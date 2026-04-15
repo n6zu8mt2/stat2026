@@ -1,0 +1,14 @@
+.rules {
+    text-align: left;
+    border-left: 4px solid #3498db;
+    padding-left: 1rem;
+}
+
+.settings {
+    text-align: center;
+}
+
+.result span {
+    font-weight: bold;
+    color: #2c3e50;
+}

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ロト6シミュレーター | 確率・統計</title>
+    <link rel="stylesheet" href="../common.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="page-wrapper">
+        <div id="sidebar-placeholder" data-root-path="../"></div>
+
+        <div class="main-content">
+            <div class="header">
+                <h1>ロト6シミュレーター</h1>
+                <p>〜宝くじの当選確率を実感する〜</p>
+            </div>
+
+            <div class="back-link">
+                <a href="../index.html">← トップページに戻る</a>
+            </div>
+
+            <main>
+                <section id="explanation">
+                    <h2>🎟️ シミュレーションの説明</h2>
+                    <p>このシミュレーターでは、ロト6の抽選をシミュレーションし、選んだ数字がどの等に当選するかを試せます。指定した回数分抽選を行い、当選結果を集計します。</p>
+                    <div class="description-box">
+                        <p><strong>シミュレーション手順:</strong></p>
+                        <ul>
+                            <li>1～43から6つの数字を選ぶ（重複なし）。</li>
+                            <li>抽選を行い、本数字6個とボーナス数字1個を決定。</li>
+                            <li>選んだ数字と抽選結果を比較し、当選等を判定。</li>
+                            <li>上記を指定した回数（m回）繰り返し、当選回数を集計。</li>
+                            <li>総獲得金額、総購入費用（1回200円）、収支を表示。</li>
+                        </ul>
+                        <p><strong>当選条件:</strong></p>
+                        <ul>
+                            <li><strong>1等（2億円）:</strong> 6個すべて本数字と一致。</li>
+                            <li><strong>2等（1000万円）:</strong> 5個が本数字と一致、残り1個がボーナス数字と一致。</li>
+                            <li><strong>3等（30万円）:</strong> 5個が本数字と一致、残り1個がボーナス数字以外。</li>
+                            <li><strong>4等（6800円）:</strong> 4個が本数字と一致。</li>
+                            <li><strong>5等（1000円）:</strong> 3個が本数字と一致。</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <section id="simulation">
+                    <h2>シミュレーション設定</h2>
+                    <div class="controls-container">
+                        <div class="control-block">
+                            <div class="input-group">
+                                <label for="numbers">選ぶ数字（1～43から6つ、スペース区切り）:</label>
+                                <input type="text" id="numbers" value="5 12 19 25 33 42" style="width: 200px; text-align: center;">
+                            </div>
+                            <div class="input-group">
+                                <label for="num-draws">抽選回数 m（1以上）:</label>
+                                <input type="number" id="num-draws" min="1" value="1000" style="width: 150px; text-align: center;">
+                            </div>
+                            <button onclick="runSimulation()" class="action-btn">抽選開始</button>
+                        </div>
+                    </div>
+
+                    <div class="results-layout">
+                        <div class="result-panel">
+                            <h3>当選結果</h3>
+                            <table id="result-table">
+                                <thead>
+                                    <tr>
+                                        <th>等</th>
+                                        <th>当選回数</th>
+                                        <th>当選金額</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="result-body">
+                                    </tbody>
+                            </table>
+                        </div>
+
+                        <div class="result-panel">
+                            <h3>収支</h3>
+                            <table id="summary-table">
+                                <thead>
+                                    <tr>
+                                        <th>項目</th>
+                                        <th>金額</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="summary-body">
+                                    </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="history-panel">
+                        <h3>抽選履歴（直近10回分）</h3>
+                        <table id="draw-table">
+                            <thead>
+                                <tr>
+                                    <th>回</th>
+                                    <th>選択した数字</th>
+                                    <th>本数字</th>
+                                    <th>ボーナス数字</th>
+                                    <th>結果</th>
+                                </tr>
+                            </thead>
+                            <tbody id="draw-table-body">
+                                </tbody>
+                        </table>
+                    </div>
+                </section>
+            </main>
+            
+            <div class="back-link bottom">
+                <a href="../index.html">← トップページに戻る</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script src="../sidebar.js"></script>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>誕生日シミュレーター | 確率・統計</title>
+    <link rel="stylesheet" href="../common.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="page-wrapper">
+        <div id="sidebar-placeholder" data-root-path="../"></div>
+
+        <div class="main-content">
+            <div class="header">
+                <h1>誕生日シミュレーター</h1>
+                <p>〜誕生日のパラドックスを体験する〜</p>
+            </div>
+
+            <div class="back-link">
+                <a href="../index.html">← トップページに戻る</a>
+            </div>
+
+            <main>
+                <section id="explanation">
+                    <h2>🎂 シミュレーションの説明</h2>
+                    <p>
+                        「クラスに同じ誕生日の人がいる確率」は、直感よりもずっと高いことで知られており、<strong>誕生日のパラドックス</strong>と呼ばれています。
+                        このシミュレーターでは、指定した人数の誕生日をランダムに生成し、同じ誕生日を持つ人がいるかを視覚的に確認できます。
+                    </p>
+                    <div class="description-box">
+                        <p><strong>シミュレーション手順:</strong></p>
+                        <ul>
+                            <li>クラスの人数（$n$）をスライダーで指定します。</li>
+                            <li>「シミュレーション実行」を押すと、1人ずつランダムな誕生日が配られます。</li>
+                            <li>すでに配られた誕生日と一致した場合、カードが色付きでハイライトされ揺れます。</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <section id="simulation">
+                    <h2>シミュレーション設定</h2>
+                    <div class="controls-container">
+                        <div class="control-block">
+                            <div class="input-group">
+                                <label for="num-people">クラスの人数 $n$（1〜100）:</label>
+                                <div class="slider-row">
+                                    <input type="range" id="slider-people" min="1" max="100" value="30">
+                                    <input type="number" id="num-people" min="1" max="100" value="30" class="num-input">
+                                    <span>人</span>
+                                </div>
+                            </div>
+                            <div class="button-row">
+                                <button id="btn-start" onclick="startSimulation()" class="action-btn">シミュレーション実行</button>
+                                <button id="btn-skip" onclick="skipAnimation()" class="action-btn skip-btn" disabled>スキップ</button>
+                            </div>
+                        </div>
+
+                        <div class="control-block">
+                            <div class="prob-box">
+                                <h4>少なくとも1組が一致する確率（理論値）</h4>
+                                <div class="prob-value" id="prob-value">70.63%</div>
+                                <div class="prob-bar-container">
+                                    <div class="prob-bar" id="prob-bar" style="width: 70.63%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="results-layout">
+                        <div class="result-panel">
+                            <h3>シミュレーション結果</h3>
+                            <p id="result-text">待機中...</p>
+                            
+                            <div class="cards-container" id="cards-container">
+                                </div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+            
+            <div class="back-link bottom">
+                <a href="../index.html">← トップページに戻る</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script src="../sidebar.js"></script>
+</body>
+</html>

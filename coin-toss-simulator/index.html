@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>コイントスシミュレーター | 確率・統計</title>
+    <link rel="stylesheet" href="../common.css">
+    <link rel="stylesheet" href="styles.css">
+
+    <script>
+        MathJax = {
+          tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']]
+          },
+          svg: { fontCache: 'global' }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <div class="page-wrapper">
+        <div id="sidebar-placeholder" data-root-path="../"></div>
+
+        <div class="main-content">
+            <div class="header">
+                <h1>コイントスシミュレーター</h1>
+                <p>〜大数の法則を視覚的に理解する〜</p>
+            </div>
+
+            <div class="back-link">
+                <a href="../index.html">← トップページに戻る</a>
+            </div>
+
+            <main>
+                <section id="explanation">
+                    <h2>🪙 シミュレーションの説明</h2>
+                    <p>このシミュレーターでは、コインを2枚同時に投げて表が出た回数をカウントします。試行回数（$n$回）を増やすにつれて、それぞれの結果が出る割合が<strong>理論上の確率</strong>に近づいていく様子（大数の法則）を観察しましょう。</p>
+                    <div class="description-box">
+                        <p><strong>理論上の確率:</strong></p>
+                        <ul>
+                            <li><strong>表が0枚（裏裏）:</strong> $\frac{1}{2} \times \frac{1}{2} = \frac{1}{4}$ (25%)</li>
+                            <li><strong>表が1枚（表裏 または 裏表）:</strong> $\frac{1}{2} \times \frac{1}{2} \times 2 = \frac{1}{2}$ (50%)</li>
+                            <li><strong>表が2枚（表表）:</strong> $\frac{1}{2} \times \frac{1}{2} = \frac{1}{4}$ (25%)</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <section id="simulation">
+                    <h2>シミュレーション設定</h2>
+                    <div class="controls-container">
+                        <div class="control-block">
+                            <div class="input-group">
+                                <label for="num-trials">試行回数 $n$（1以上）:</label>
+                                <input type="number" id="num-trials" min="1" value="100" style="width: 150px; text-align: center;">
+                            </div>
+                            <div class="button-row">
+                                <button id="btn-start" onclick="runSimulation()" class="action-btn">シミュレーション実行</button>
+                                <button id="btn-pause" onclick="togglePause()" class="action-btn pause-btn" disabled>一時停止</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="coin-container">
+                        <div class="coin-wrapper">
+                            <div class="coin" id="coin1">
+                                <div class="coin-face front">表</div>
+                                <div class="coin-face back">裏</div>
+                            </div>
+                        </div>
+                        <div class="coin-wrapper">
+                            <div class="coin" id="coin2">
+                                <div class="coin-face front">表</div>
+                                <div class="coin-face back">裏</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="progress-info">
+                        現在: <span id="current-trial">0</span> / <span id="total-trial">100</span> 回
+                    </div>
+
+                    <div class="results-layout">
+                        <div class="result-panel">
+                            <h3>結果集計</h3>
+                            <table id="result-table">
+                                <thead>
+                                    <tr>
+                                        <th>表の枚数</th>
+                                        <th>回数</th>
+                                        <th>割合</th>
+                                        <th>理論値</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="result-body">
+                                    <tr class="rank-1">
+                                        <td class="row-label">0枚 (裏裏)</td>
+                                        <td id="count-0" class="num">0</td>
+                                        <td id="rate-0" class="num">0.00%</td>
+                                        <td class="num">25.00%</td>
+                                    </tr>
+                                    <tr class="rank-2">
+                                        <td class="row-label">1枚 (表裏)</td>
+                                        <td id="count-1" class="num">0</td>
+                                        <td id="rate-1" class="num">0.00%</td>
+                                        <td class="num">50.00%</td>
+                                    </tr>
+                                    <tr class="rank-3">
+                                        <td class="row-label">2枚 (表表)</td>
+                                        <td id="count-2" class="num">0</td>
+                                        <td id="rate-2" class="num">0.00%</td>
+                                        <td class="num">25.00%</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="result-panel history-panel">
+                            <h3>直近10件の履歴</h3>
+                            <table id="history-table">
+                                <thead>
+                                    <tr>
+                                        <th>回目</th>
+                                        <th>コイン1</th>
+                                        <th>コイン2</th>
+                                        <th>表の枚数</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="history-body">
+                                    </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+            </main>
+
+            <div class="back-link bottom">
+                <a href="../index.html">← トップページに戻る</a>
+            </div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+    <script src="../sidebar.js"></script>
+</body>
+</html>
