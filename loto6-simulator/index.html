@@ -14,7 +14,7 @@
         <div class="main-content">
             <div class="header">
                 <h1>ロト6シミュレーター</h1>
-                <p>〜宝くじの当選確率を実感する〜</p>
+                <p>〜宝くじの当選確率と大数の法則を実感する〜</p>
             </div>
 
             <div class="back-link">
@@ -24,23 +24,21 @@
             <main>
                 <section id="explanation">
                     <h2>🎟️ シミュレーションの説明</h2>
-                    <p>このシミュレーターでは、ロト6の抽選をシミュレーションし、選んだ数字がどの等に当選するかを試せます。指定した回数分抽選を行い、当選結果を集計します。</p>
+                    <p>このシミュレーターでは、ロト6の抽選をシミュレーションし、宝くじがいかに当たりにくいか、そして試行回数を増やすと<strong>実際の当選割合が理論上の確率に近づいていくこと（大数の法則）</strong>を体験できます。</p>
                     <div class="description-box">
                         <p><strong>シミュレーション手順:</strong></p>
                         <ul>
-                            <li>1～43から6つの数字を選ぶ（重複なし）。</li>
-                            <li>抽選を行い、本数字6個とボーナス数字1個を決定。</li>
-                            <li>選んだ数字と抽選結果を比較し、当選等を判定。</li>
-                            <li>上記を指定した回数（m回）繰り返し、当選回数を集計。</li>
-                            <li>総獲得金額、総購入費用（1回200円）、収支を表示。</li>
+                            <li>1～43から6つの数字を選びます（「クイックピック」でランダム選択も可能）。</li>
+                            <li>抽選回数（m回）を指定して「抽選開始」を押します。</li>
+                            <li>指定回数分の抽選を一気に実行し、当選結果・収支・履歴を表示します。</li>
                         </ul>
-                        <p><strong>当選条件:</strong></p>
+                        <p><strong>当選条件と理論上の確率（全 6,096,454 通り）:</strong></p>
                         <ul>
-                            <li><strong>1等（2億円）:</strong> 6個すべて本数字と一致。</li>
-                            <li><strong>2等（1000万円）:</strong> 5個が本数字と一致、残り1個がボーナス数字と一致。</li>
-                            <li><strong>3等（30万円）:</strong> 5個が本数字と一致、残り1個がボーナス数字以外。</li>
-                            <li><strong>4等（6800円）:</strong> 4個が本数字と一致。</li>
-                            <li><strong>5等（1000円）:</strong> 3個が本数字と一致。</li>
+                            <li><strong>1等（2億円）:</strong> 6個すべて本数字と一致 <span class="prob-text">(約 0.000016%)</span></li>
+                            <li><strong>2等（1000万円）:</strong> 5個が本数字、残り1個がボーナス数字と一致 <span class="prob-text">(約 0.000098%)</span></li>
+                            <li><strong>3等（30万円）:</strong> 5個が本数字と一致 <span class="prob-text">(約 0.0035%)</span></li>
+                            <li><strong>4等（6800円）:</strong> 4個が本数字と一致 <span class="prob-text">(約 0.16%)</span></li>
+                            <li><strong>5等（1000円）:</strong> 3個が本数字と一致 <span class="prob-text">(約 2.55%)</span></li>
                         </ul>
                     </div>
                 </section>
@@ -51,25 +49,30 @@
                         <div class="control-block">
                             <div class="input-group">
                                 <label for="numbers">選ぶ数字（1～43から6つ、スペース区切り）:</label>
-                                <input type="text" id="numbers" value="5 12 19 25 33 42" style="width: 200px; text-align: center;">
+                                <div class="num-input-row">
+                                    <input type="text" id="numbers" value="1 2 3 4 5 6" class="loto-input">
+                                    <button onclick="generateQuickPick()" class="quick-pick-btn">🎲 クイックピック</button>
+                                </div>
                             </div>
                             <div class="input-group">
                                 <label for="num-draws">抽選回数 m（1以上）:</label>
-                                <input type="number" id="num-draws" min="1" value="1000" style="width: 150px; text-align: center;">
+                                <input type="number" id="num-draws" min="1" value="10000" class="draws-input">
                             </div>
-                            <button onclick="runSimulation()" class="action-btn">抽選開始</button>
+                            <button onclick="runSimulation()" class="action-btn" id="btn-start">抽選開始</button>
                         </div>
                     </div>
 
                     <div class="results-layout">
-                        <div class="result-panel">
-                            <h3>当選結果</h3>
+                        <div class="result-panel main-result">
+                            <h3>当選結果と大数の法則</h3>
                             <table id="result-table">
                                 <thead>
                                     <tr>
                                         <th>等</th>
                                         <th>当選回数</th>
-                                        <th>当選金額</th>
+                                        <th>出現割合</th>
+                                        <th>理論値</th>
+                                        <th>当選金額合計</th>
                                     </tr>
                                 </thead>
                                 <tbody id="result-body">
@@ -77,8 +80,8 @@
                             </table>
                         </div>
 
-                        <div class="result-panel">
-                            <h3>収支</h3>
+                        <div class="result-panel summary-panel">
+                            <h3>最終収支</h3>
                             <table id="summary-table">
                                 <thead>
                                     <tr>
@@ -94,12 +97,13 @@
 
                     <div class="history-panel">
                         <h3>抽選履歴（直近10回分）</h3>
+                        <p class="note">※ 選択した数字と一致した本数字は<span class="match-main-demo">オレンジ色</span>、ボーナス数字は<span class="match-bonus-demo">青色</span>で強調されます。</p>
                         <table id="draw-table">
                             <thead>
                                 <tr>
                                     <th>回</th>
                                     <th>選択した数字</th>
-                                    <th>本数字</th>
+                                    <th>本数字 (6個)</th>
                                     <th>ボーナス数字</th>
                                     <th>結果</th>
                                 </tr>

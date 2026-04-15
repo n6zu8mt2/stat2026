@@ -26,6 +26,12 @@ main h2 {
     margin-top: 15px;
 }
 
+.prob-text {
+    color: #7f8c8d;
+    font-family: monospace;
+    margin-left: 10px;
+}
+
 /* コントロールパネル */
 .controls-container {
     background-color: #e3f2fd;
@@ -34,8 +40,6 @@ main h2 {
     padding: 20px;
     margin-bottom: 30px;
     display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
     justify-content: center;
 }
 
@@ -45,6 +49,7 @@ main h2 {
     align-items: center;
     gap: 15px;
     width: 100%;
+    max-width: 500px;
 }
 
 .input-group {
@@ -55,35 +60,65 @@ main h2 {
     margin-bottom: 0;
 }
 
+.num-input-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+/* ここで入力欄の横幅を1.5倍 (330px) にしています */
+.loto-input {
+    width: 330px;
+    text-align: center;
+    font-size: 1.1em;
+    letter-spacing: 2px;
+    font-family: monospace;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.draws-input {
+    width: 150px;
+    text-align: center;
+    font-size: 1.1em;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.quick-pick-btn {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 9px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.quick-pick-btn:hover { background-color: #2980b9; }
+
 .action-btn {
     background-color: #f57c00;
     color: white;
     font-size: 1.2em;
-    padding: 10px 30px;
+    padding: 10px 40px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
     font-weight: bold;
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     transition: background-color 0.2s, transform 0.1s;
+    margin-top: 10px;
 }
 
-.action-btn:hover {
-    background-color: #ef6c00;
-}
+.action-btn:hover { background-color: #ef6c00; }
+.action-btn:active { transform: translateY(2px); box-shadow: 0 2px 3px rgba(0,0,0,0.1); }
+.action-btn:disabled { background-color: #ccc; cursor: not-allowed; box-shadow: none; }
 
-.action-btn:active {
-    transform: translateY(2px);
-    box-shadow: 0 2px 3px rgba(0,0,0,0.1);
-}
-
-.action-btn:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
-    box-shadow: none;
-}
-
-/* 結果パネル (左右分割) */
+/* 結果パネル */
 .results-layout {
     display: flex;
     flex-wrap: wrap;
@@ -92,13 +127,14 @@ main h2 {
 }
 
 .result-panel {
-    flex: 1;
-    min-width: 300px;
     background-color: #fff;
     border: 1px solid #ddd;
     border-radius: 8px;
     padding: 15px;
 }
+
+.main-result { flex: 2; min-width: 400px; }
+.summary-panel { flex: 1; min-width: 250px; }
 
 .result-panel h3, .history-panel h3 {
     margin-top: 0;
@@ -114,6 +150,13 @@ main h2 {
     border: 1px solid #ddd;
     border-radius: 8px;
     padding: 15px;
+}
+
+.note {
+    font-size: 0.9em;
+    color: #555;
+    text-align: center;
+    margin-bottom: 15px;
 }
 
 /* テーブルスタイル */
@@ -134,29 +177,53 @@ th {
     color: #2c3e50;
 }
 
+td.num {
+    font-family: monospace;
+}
+
 /* 当選等ごとの色 */
-td.rank-1 { background-color: #ffcccc; font-weight: bold; color: #c0392b;} /* 1等 */
-td.rank-2 { background-color: #ffe0b2; font-weight: bold; color: #d35400;} /* 2等 */
-td.rank-3 { background-color: #fff9c4; font-weight: bold; color: #f39c12;} /* 3等 */
-td.rank-4 { background-color: #dcedc8; } /* 4等 */
-td.rank-5 { background-color: #c8e6c9; } /* 5等 */
+tr.rank-1 td:first-child { background-color: #ffcccc; font-weight: bold; color: #c0392b;} 
+tr.rank-2 td:first-child { background-color: #ffe0b2; font-weight: bold; color: #d35400;} 
+tr.rank-3 td:first-child { background-color: #fff9c4; font-weight: bold; color: #f39c12;} 
+tr.rank-4 td:first-child { background-color: #dcedc8; } 
+tr.rank-5 td:first-child { background-color: #c8e6c9; } 
+
+/* 履歴テーブルの行全体色付 */
+td.rank-1 { background-color: #ffcccc; font-weight: bold; color: #c0392b;}
+td.rank-2 { background-color: #ffe0b2; font-weight: bold; color: #d35400;}
+td.rank-3 { background-color: #fff9c4; font-weight: bold; color: #f39c12;}
+td.rank-4 { background-color: #dcedc8; font-weight: bold; color: #558b2f;}
+td.rank-5 { background-color: #c8e6c9; font-weight: bold; color: #2e7d32;}
 
 /* 収支の色 */
-td.profit-positive { background-color: #c8e6c9; color: #27ae60; font-weight: bold; }
-td.profit-negative { background-color: #ffcccc; color: #c0392b; font-weight: bold; }
+td.profit-positive { background-color: #e8f5e9; color: #2e7d32; font-weight: bold; font-size: 1.1em;}
+td.profit-negative { background-color: #ffebee; color: #c62828; font-weight: bold; font-size: 1.1em;}
+
+/* ハイライト（一致した数字） */
+.match-main {
+    display: inline-block;
+    background-color: #ffe0b2;
+    color: #e65100;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid #ffb74d;
+}
+.match-bonus {
+    display: inline-block;
+    background-color: #bbdefb;
+    color: #1565c0;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid #64b5f6;
+}
+
+.match-main-demo { color: #e65100; font-weight: bold; background-color: #ffe0b2; padding: 0 4px; border-radius:3px; }
+.match-bonus-demo { color: #1565c0; font-weight: bold; background-color: #bbdefb; padding: 0 4px; border-radius:3px; }
 
 /* 戻るリンク */
-.back-link {
-    margin: 15px 0;
-}
-.back-link a {
-    font-weight: bold;
-    color: #1565c0;
-    text-decoration: none;
-}
-.back-link a:hover {
-    text-decoration: underline;
-}
-.back-link.bottom {
-    margin-top: 40px;
-}
+.back-link { margin: 15px 0; }
+.back-link a { font-weight: bold; color: #1565c0; text-decoration: none; }
+.back-link a:hover { text-decoration: underline; }
+.back-link.bottom { margin-top: 40px; }
