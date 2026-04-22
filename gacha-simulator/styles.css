@@ -1,0 +1,187 @@
+/* ガチャシミュレーター固有のスタイル */
+.settings, .additional-draws {
+    text-align: center;
+}
+
+/* コントロールパネルの共通化 */
+.controls-container {
+    background-color: #e3f2fd;
+    border: 1px solid #bbdefb;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.control-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.draws-input {
+    width: 150px;
+    text-align: center;
+    font-size: 1.1em;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.button-row {
+    display: flex;
+    gap: 15px;
+}
+
+.action-btn {
+    background-color: #3498db;
+    color: white;
+    font-size: 1.1em;
+    padding: 10px 30px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.action-btn:hover { background-color: #2980b9; }
+.action-btn:active { transform: translateY(2px); box-shadow: 0 2px 3px rgba(0,0,0,0.1); }
+
+/* リセット＆コンプリートボタン */
+.reset-btn { background-color: #e74c3c; }
+.reset-btn:hover { background-color: #c0392b; }
+
+.complete-btn { background-color: #9c27b0; }
+.complete-btn:hover { background-color: #7b1fa2; }
+
+/* 景品ごとの色 */
+.color-0 { background-color: #ff9999; color: #333; font-weight: bold; } /* 赤 */
+.color-1 { background-color: #99ff99; color: #333; font-weight: bold; } /* 緑 */
+.color-2 { background-color: #9999ff; color: #333; font-weight: bold; } /* 青 */
+.color-3 { background-color: #ffcc80; color: #333; font-weight: bold; } /* オレンジ */
+.color-4 { background-color: #81d4fa; color: #333; font-weight: bold; } /* 水色 */
+.color-5 { background-color: #ce93d8; color: #333; font-weight: bold; } /* 紫 */
+.color-6 { background-color: #f48fb1; color: #333; font-weight: bold; } /* ピンク */
+.color-7 { background-color: #80cbc4; color: #333; font-weight: bold; } /* シアン */
+.color-8 { background-color: #c5e1a5; color: #333; font-weight: bold; } /* 黄緑 */
+.color-9 { background-color: #bcaaa4; color: #333; font-weight: bold; } /* 茶色 */
+
+/* 結果セクション */
+.result-section {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.theory-box {
+    background: #e8f5e9;
+    padding: 15px;
+    border-radius: 5px;
+    color: #2e7d32;
+    margin-bottom: 15px;
+    border-left: 5px solid #4caf50;
+    line-height: 1.6;
+    overflow-x: auto; /* 数式がはみ出さないように */
+}
+
+.summary-text {
+    font-size: 1.2em;
+    text-align: center;
+    background-color: #f5f5f5;
+    padding: 15px;
+    border-radius: 5px;
+}
+
+/* アルバム（コンプリート状況） */
+.collection-status h2 {
+    font-size: 1.3em;
+    text-align: center;
+    margin-top: 30px;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.inventory-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+}
+
+.inventory-item {
+    width: 65px;
+    height: 65px;
+    border-radius: 10px;
+    border: 2px dashed #bbb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background-color: #f9f9f9;
+    color: #aaa;
+    font-size: 0.9em;
+    text-align: center;
+    line-height: 1.2;
+}
+
+.inventory-item.collected {
+    border-style: solid;
+    border-color: #fff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #e74c3c;
+    color: white;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    font-size: 0.8em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    border: 2px solid #fff;
+}
+
+/* 履歴テーブル */
+.history-section h2 {
+    font-size: 1.3em;
+    text-align: center;
+}
+
+.history-wrapper {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #bdc3c7;
+    border-radius: 4px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+td {
+    padding: 8px;
+    border: 1px solid #ecf0f1;
+    text-align: center;
+    font-size: 0.9em;
+}

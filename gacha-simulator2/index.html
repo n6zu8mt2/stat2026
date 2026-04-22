@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ガチャ確率シミュレーター | 物理数学シミュレーター</title>
+    <link rel="stylesheet" href="../common.css">
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        MathJax = {
+          tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] },
+          svg: { fontCache: 'global' }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <div class="page-wrapper">
+        <div id="sidebar-placeholder" data-root-path="../"></div>
+
+        <div class="main-content">
+            <div class="header">
+                <h1>ガチャ確率シミュレーター</h1>
+                <p>〜「1%を100回引けば当たる」の罠〜</p>
+            </div>
+
+            <div class="back-link">
+                <a href="../index.html">← トップページに戻る</a>
+            </div>
+
+            <main>
+                <section id="explanation">
+                    <h2>確率の落とし穴 📊</h2>
+                    <p>「排出率1%のガチャなら、100回引けば1回くらいは当たるだろう（100%に近いだろう）」と直感的に思いがちですが、実際はどうでしょうか？</p>
+                    
+                    <div class="theory-card">
+                        <h3>「少なくとも1回当たる」確率の計算（余事象）</h3>
+                        <p>このような確率は、<strong>「1回も当たらない確率」</strong>を全体の $100\% (=1)$ から引くことで計算できます。</p>
+                        <ul>
+                            <li>1回引いて「ハズレ」る確率は $99\% (=0.99)$ です。</li>
+                            <li>100回連続で「ハズレ」る確率は $0.99^{100} \approx 0.366$（約36.6%）となります。</li>
+                        </ul>
+                        <p>したがって、100回引いて<strong>少なくとも1回当たる確率</strong>は以下のようになります。</p>
+                        $$ 1 - 0.99^{100} \approx 0.6339 \quad \text{（約 63.4 %）} $$
+                        <p>つまり、100回引いても<strong>約3人に1人は1回も当たらない（爆死する）</strong>ということになります。。</p>
+                    </div>
+                </section>
+
+                <section id="simulation">
+                    <h2>シミュレーター</h2>
+                    
+                    <div class="ui-controls">
+                        <div class="control-panel basic-panel">
+                            <h3>ガチャを引く</h3>
+                            <div class="input-row">
+                                <label>欲しいキャラの排出率:</label>
+                                <div>
+                                    <input type="number" id="probability" step="0.01" min="0.01" max="99" value="1.0"> %
+                                </div>
+                            </div>
+                            <div class="button-grid">
+                                <button onclick="drawGacha(10)" class="btn-normal">10連ガチャを引く</button>
+                                <div class="flex-input-btn">
+                                    <input type="number" id="extraDraws" step="1" min="1" value="50" class="small-input"> 連を
+                                    <button onclick="drawM()" class="btn-normal">追加で引く</button>
+                                </div>
+                                <button onclick="drawUntilSuccess()" id="btn-until-success" class="btn-special">✨ 出るまで引く</button>
+                                <button onclick="resetAll()" class="btn-danger">リセット</button>
+                            </div>
+                        </div>
+
+                        <div class="control-panel advanced-panel">
+                            <h3>大数の法則（大規模シミュレーション）</h3>
+                            <p class="panel-desc">「指定回数のガチャ」を何千人もが同時に行った場合の結果を検証します。</p>
+                            <div class="input-row">
+                                <label>1人あたりのガチャ回数:</label>
+                                <input type="number" id="drawsPerSimulation" step="1" min="1" value="100" class="small-input"> 回
+                            </div>
+                            <div class="input-row">
+                                <label>シミュレーション人数:</label>
+                                <input type="number" id="simulationCount" step="1" min="1" value="10000" class="small-input"> 人
+                            </div>
+                            <button onclick="simulateMultipleDraws()" class="btn-primary" style="width: 100%; margin-top: 10px;">シミュレーション実行</button>
+                            
+                            <div id="simulationResult" class="sim-result-box" style="display: none;">
+                                </div>
+                        </div>
+                    </div>
+
+                    <div class="result-container">
+                        <div class="summary-header">
+                            <h3>あなたのガチャ結果</h3>
+                            <div class="toggle-container">
+                                <label for="tableToggle">履歴アイコンを表示:</label>
+                                <label class="switch">
+                                    <input type="checkbox" id="tableToggle" checked onchange="toggleGrid()">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div id="summary" class="summary-text">ガチャを引いてください。</div>
+                        
+                        <div id="resultGrid" class="gacha-grid">
+                            </div>
+                    </div>
+                    
+                    <div id="gachaModal" class="modal-overlay" style="display: none;">
+                        <div class="modal-content">
+                            <h2 id="modal-title" class="modal-title">🎉 おめでとうございます！</h2>
+                            <div class="gacha-card-container">
+                                <div id="gacha-card" class="gacha-card">
+                                    <span class="card-text">SSR</span>
+                                </div>
+                            </div>
+                            <p id="modal-desc" class="modal-desc">欲しいキャラが <strong>150回目</strong> で出ました！</p>
+                            <button onclick="closeModal()" class="btn-primary" style="margin-top:20px; width:100%; font-size:1.2em;">確認</button>
+                        </div>
+                    </div>
+
+                </section>
+            </main>
+        </div>
+    </div>
+    <script src="script.js"></script>
+    <script src="../sidebar.js"></script>
+</body>
+</html>

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>コンプガチャシミュレーター</title>
+    <link rel="stylesheet" href="../common.css">
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        MathJax = {
+          tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] },
+          svg: { fontCache: 'global' }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <div class="page-wrapper">
+        <div id="sidebar-placeholder" data-root-path="../"></div>
+
+        <div class="main-content">
+            <div class="header">
+                <h1>コンプガチャシミュレーター</h1>
+                <p>〜コンプリートの壁（クーポンコレクター問題）を体験する〜</p>
+            </div>
+            <div class="container">
+                <div class="description" id="explanation">
+                    <h2>🎰 シミュレーションの説明</h2>
+                    <p>このシミュレーターは、ランダムに出る景品を全種類集めるのにどれくらい苦労するか（クーポンコレクター問題）を体験するものです。</p>
+                    <div class="description-box">
+                        <ul>
+                            <li><strong>ガチャを引く:</strong> 指定した回数だけガチャを引きます。</li>
+                            <li><strong>追加で引く:</strong> 現在の状態からさらにガチャを引き足します。</li>
+                            <li><strong>コンプリートするまで引く:</strong> 全種類が揃うまで自動でガチャを引き続けます。「あと1種類」が出てこない沼を体験できます。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="settings controls-container">
+                    <div class="control-block">
+                        <div class="input-group">
+                            <label for="num-items">景品の種類数 n（1以上）:</label>
+                            <input type="number" id="num-items" min="1" value="5" class="draws-input">
+                        </div>
+                        <div class="input-group">
+                            <label for="num-draws">最初に引く回数 m（1以上）:</label>
+                            <input type="number" id="num-draws" min="1" value="5" class="draws-input">
+                        </div>
+                        <div class="button-row">
+                            <button onclick="runSimulation()" class="action-btn">ガチャを引く</button>
+                            <button onclick="resetSimulation()" class="action-btn reset-btn">リセット</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="additional-draws controls-container" style="background-color: #f3e5f5; border-color: #e1bee7;">
+                    <div class="control-block" style="flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 20px;">
+                        <div class="input-group" style="flex-direction: row; align-items: center; gap: 10px;">
+                            <label for="additional-draws" style="margin:0;">追加で引く回数:</label>
+                            <input type="number" id="additional-draws" min="1" value="1" class="draws-input" style="width: 80px;">
+                            <button onclick="additionalDraw()" class="action-btn" style="margin:0; padding: 8px 20px; font-size: 1em;">追加する</button>
+                        </div>
+                        <button onclick="drawUntilComplete()" class="action-btn complete-btn" style="margin:0;">✨ コンプリートするまで引く</button>
+                    </div>
+                </div>
+
+                <div class="result-section">
+                    <div class="result-summary">
+                        <h2>結果概要</h2>
+                        <div id="theory-box" class="theory-box">
+                            </div>
+                        <p id="summary-text" class="summary-text">ガチャを引いてください。</p>
+                    </div>
+
+                    <div class="collection-status">
+                        <h2>コンプリート状況（アルバム）</h2>
+                        <div id="inventory-grid" class="inventory-grid">
+                            </div>
+                    </div>
+                </div>
+
+                <div class="history-section">
+                    <h2>ガチャ履歴</h2>
+                    <div class="history-wrapper">
+                        <table id="gacha-table">
+                            <tbody id="gacha-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="back-link bottom">
+                <a href="../index.html">← トップページに戻る</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script src="../sidebar.js"></script>
+</body>
+</html>
