@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>感染症確率シミュレーター | ベイズの定理</title>
+    <link rel="stylesheet" href="../common.css">
+    <link rel="stylesheet" href="styles.css">
+    <script>
+    MathJax = {
+        tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+        svg: { fontCache: 'global' }
+    };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.2/p5.min.js"></script>
+</head>
+<body>
+    <div class="page-wrapper">
+        <div id="sidebar-placeholder" data-root-path="../"></div>
+
+        <div class="main-content">
+            <div class="header">
+                <h1>感染症確率シミュレーター</h1>
+                <p>〜「陽性」と言われたら、本当に病気なのか？〜</p>
+            </div>
+            
+            <div class="back-link">
+                <a href="../index.html">← トップページに戻る</a>
+            </div>
+
+            <main class="container">
+                <section class="description-card">
+                    <h2>🩺 直感とずれる「条件付き確率」</h2>
+                    <p>
+                        検査の精度（感度・特異度）が「90%」のように非常に高くても、その病気自体が珍しい場合、<strong>「陽性と判定されても、実は病気ではない（偽陽性）」</strong>確率が意外と高くなります。これをベイズの定理を用いてシミュレーションします。
+                    </p>
+                    <div class="formula-description">
+                        <h3>数式による定義（ベイズの定理）</h3>
+                        <p>事象 $A$ を「病気にかかっている」、事象 $B$ を「検査で陽性になる」とします。</p>
+                        <ul>
+                            <li><strong>$P(A)$ (事前確率):</strong> 実際に病気にかかっている確率</li>
+                            <li><strong>$P(B|A)$ (感度):</strong> 病気の人が正しく「陽性」と判定される確率</li>
+                            <li><strong>$P(\overline{B}|\overline{A})$ (特異度):</strong> 健康な人が正しく「陰性」と判定される確率</li>
+                        </ul>
+                        <p>求めたいのは、<strong>「陽性と判定された条件のもとで、本当に病気である確率 $P(A|B)$」</strong>です。</p>
+                        $$ P(A|B) = \frac{P(B|A)P(A)}{P(B|A)P(A) + (1 - P(\overline{B}|\overline{A}))(1 - P(A))} $$
+                    </div>
+                </section>
+
+                <section class="controls-card">
+                    <h2>パラメータ設定</h2>
+                    
+                    <div class="control-group">
+                        <div class="label-area">
+                            <label>病気にかかっている確率 $P(A)$</label>
+                            <span class="supplement">（事前確率 / 罹患率）</span>
+                        </div>
+                        <div class="input-area">
+                            <input type="range" id="slider-p" min="0" max="1" step="0.01" value="0.1">
+                            <input type="number" id="diseaseProbability" step="0.01" min="0" max="1" value="0.1">
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <div class="label-area">
+                            <label>病気の人が「陽性」になる確率 $P(B|A)$</label>
+                            <span class="supplement">（感度）</span>
+                        </div>
+                        <div class="input-area">
+                            <input type="range" id="slider-q" min="0" max="1" step="0.01" value="0.9">
+                            <input type="number" id="positiveGivenDisease" step="0.01" min="0" max="1" value="0.9">
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <div class="label-area">
+                            <label>健康な人が「陰性」になる確率 $P(\overline{B}|\overline{A})$</label>
+                            <span class="supplement">（特異度）</span>
+                        </div>
+                        <div class="input-area">
+                            <input type="range" id="slider-r" min="0" max="1" step="0.01" value="0.7">
+                            <input type="number" id="negativeGivenNoDisease" step="0.01" min="0" max="1" value="0.7">
+                        </div>
+                    </div>
+
+                    <div class="button-group">
+                        <button onclick="calculateProbability()" class="btn-primary">確率を計算</button>
+                        <button onclick="reset()" class="btn-secondary">リセット</button>
+                    </div>
+                </section>
+
+                <section class="result-card">
+                    <h2>シミュレーション結果</h2>
+                    
+                    <div id="main-result" class="main-result-box">
+                        <div class="result-title">検査で「陽性」になった人が、本当に病気である確率 $P(A|B)$</div>
+                        <div id="result-value" class="result-value">-- %</div>
+                    </div>
+
+                    <div id="concrete-example" class="concrete-example" style="display: none;">
+                        </div>
+
+                    <div class="graph-toggle-section">
+                        <div class="toggle-header">
+                            <label for="tableToggle" style="font-weight: bold;">グラフと変化表を表示（$P(A)$ を変動させた場合）</label>
+                            <label class="switch">
+                                <input type="checkbox" id="tableToggle">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="graph-table-layout">
+                            <div id="canvasContainer" class="canvas-container"></div>
+                            <div id="probabilityTable" class="table-container"></div>
+                        </div>
+                    </div>
+                </section>
+
+            </main>
+        </div>
+    </div>
+    <script src="script.js"></script>
+    <script src="../sidebar.js"></script>
+</body>
+</html>
