@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>逆正弦法則シミュレーター | 直感に反する確率</title>
+    <link rel="stylesheet" href="../common.css">
+    <link rel="stylesheet" href="arcsine_law.css">
+    <script>
+        MathJax = {
+          tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
+          svg: { fontCache: 'global' }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.2/p5.min.js"></script>
+</head>
+<body>
+    <div class="page-wrapper">
+        <div id="sidebar-placeholder" data-root-path="../"></div>
+
+        <div class="main-content">
+            <div class="header">
+                <h1>逆正弦法則シミュレーター</h1>
+                <p>〜「半々になる」という直感の裏切り〜</p>
+            </div>
+            
+            <div class="back-link">
+                <a href="../index.html">← トップページに戻る</a>
+            </div>
+
+            <div class="container">
+                <div class="description">
+                    <h2>⏳ ランダムウォークと逆正弦法則</h2>
+                    <p>
+                        実力が完全に互角（勝率50%ずつ）のAチームとBチームが、何度も点を取り合う試合をしたとします。<br>
+                        多くの人は<strong>「実力が同じなら、試合の半分（50%）の時間はAチームがリードし、残り半分はBチームがリードするだろう」</strong>と直感的に予想します。
+                    </p>
+                    
+                    <div class="formula-description">
+                        <h3>数式による定義</h3>
+                        <p>
+                            各ステップ（時刻 $i$）におけるスコアの変動を確率変数 $X_i$ とします。Aチームが点を取れば $X_i = 1$、Bチームが点を取れば $X_i = -1$ とします。<br>
+                            実力が互角の場合、$X_1, X_2, \dots$ は互いに独立に、以下の確率分布（確率 $1/2$ のコイントス）に従うとみなせます。
+                            $$ P(X_i = 1) = \frac{1}{2}, \quad P(X_i = -1) = \frac{1}{2} $$
+                            時刻 $n$ におけるAチームのリード（スコア差）$S_n$ は、これまでの変動の合計として表されます（初期値 $S_0 = 0$）。
+                            $$ S_n = X_1 + X_2 + \cdots + X_n $$
+                        </p>
+                        
+                        <h3>リード時間の定義</h3>
+                        <p>
+                            本シミュレーターでは、以下のいずれかの条件を満たす区間（時刻 $t-1$ から $t$ への1ステップ）を<strong>「Aチームがリードしている時間」</strong>としてカウントします。
+                        </p>
+                        <ul>
+                            <li>$S_t > 0$ である（Aチームが点数で勝っている状態に移行した）</li>
+                            <li>$S_t = 0$ かつ $S_{t-1} > 0$ である（Aチームが同点に追いつかれたが、直前までリードしていた）</li>
+                        </ul>
+                    </div>
+
+                    <p>
+                        この数学（ランダムウォーク）が導き出す答えは直感と<strong>真逆</strong>です。<br>
+                        実際には、<strong>「一方が試合の最初から最後までほぼずっとリードし続ける」確率が最も高く、「リード時間が半々になる」確率が最も低い（稀である）</strong>のです。この現象が従う確率分布を<strong>逆正弦法則（Arcsine Law）</strong>と呼びます。<br>
+                        一度差がつくと、ランダムな動きであっても「差がゼロに戻る」のには想像以上の時間がかかるという残酷な事実を体験してみましょう。
+                    </p>
+                </div>
+
+                <div class="live-match-section">
+                    <h2>⚽ ライブマッチ観戦（1試合の動きを見る）</h2>
+                    <p>下のボタンを押すと、互角のチーム同士の100ターンの試合がリアルタイムで描画されます。</p>
+                    <ul>
+                        <li><strong>横軸（時間 $t$）</strong>: 試合の進行度（ステップ数）を表します。</li>
+                        <li><strong>縦軸（点差 $S_t$）</strong>: Aチームのリード（Aの得点 - Bの得点）を表します。</li>
+                    </ul>
+                    <p>グラフが中央の0ラインより上（赤色領域）にある間がAチームのリード時間です。<br>
+                    本当に「リード時間が半々」にならないのか、ゲージの偏りに注目して観察してください。</p>
+                    
+                    <div id="visualization-container">
+                        <div class="live-stats">
+                            <div class="team-stat team-a">
+                                Aチームリード<br>
+                                <span id="live-a-pct">0%</span>
+                                <span class="step-count">( <span id="live-a-steps">0</span> / <span id="live-total-steps-a">0</span> step )</span>
+                            </div>
+                            <div class="live-gauge">
+                                <div id="gauge-bar-a" class="gauge-bar a-bar"></div>
+                                <div class="gauge-center-line"></div>
+                            </div>
+                            <div class="team-stat team-b">
+                                Bチームリード<br>
+                                <span id="live-b-pct">0%</span>
+                                <span class="step-count">( <span id="live-b-steps">0</span> / <span id="live-total-steps-b">0</span> step )</span>
+                            </div>
+                        </div>
+                        
+                        <div id="walk-graph-container"></div>
+                        
+                        <div id="walk-controls">
+                            <button id="start-live-btn" class="action-btn">▶ 新しい試合</button>
+                            <button id="pause-live-btn" class="action-btn" style="background-color: #6c757d;" disabled>⏸ 一時停止</button>
+                            <span id="live-status" class="status-text">待機中...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings" style="margin-top: 40px;">
+                    <h2>📊 大規模シミュレーション（逆正弦法則の3つの顔）</h2>
+                    <p>上記の1試合を、今度は一気に<strong>10,000試合</strong>行い、「リード時間」「最後に同点になった時刻」「最大のリードを奪った時刻」をすべて記録してヒストグラムを作ります。</p>
+                    
+                    <div class="control-panel">
+                        <div class="control-group">
+                            <label for="prob_p">Aチームが得点する確率 p:</label>
+                            <input type="number" id="prob_p" value="0.5" min="0" max="1" step="0.01">
+                        </div>
+                        <div class="control-group">
+                            <label for="num_steps_n">1試合のステップ数 n:</label>
+                            <input type="number" id="num_steps_n" value="100" min="10" step="10">
+                        </div>
+                        <div class="control-group">
+                            <label for="num_simulations_k">シミュレーション試合数 k:</label>
+                            <input type="number" id="num_simulations_k" value="10000" min="1000">
+                        </div>
+                        <div class="button-group">
+                            <button id="run_simulation_btn" class="action-btn large-btn">大規模シミュレーション実行</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="results-section">
+                    <div class="result-block">
+                        <h3>📈 1. リード時間の割合の分布（U字カーブ）</h3>
+                        <p><strong>横軸</strong>は「Aチームがリードした時間の割合（0%〜100%）」、<strong>縦軸</strong>は「その割合になった確率（相対度数）」を示します。<br>青い棒がシミュレーション結果、赤い線が理論的な「逆正弦法則」の曲線です。<br>中央（50%）が最も低く、両端（0%や100%付近）が最も高くなる「<strong>U字カーブ</strong>」になることが確認できます。</p>
+                        <div id="lead-time-histogram-container"></div>
+                    </div>
+
+                    <div class="result-block">
+                        <h3>📋 階級別の集計表（リード時間）</h3>
+                        <div id="lead-time-table-container">
+                            <table id="lead-time-table">
+                                <thead>
+                                    <tr>
+                                        <th>Aチームがリードした時間の割合</th>
+                                        <th>発生した試合数</th>
+                                        <th>確率（相対度数）</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="lead-time-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="result-block" style="margin-top: 40px;">
+                        <h3>📈 2. 最後に同点に戻った時刻の分布</h3>
+                        <p>
+                            試合中、スコアが「同点（点差ゼロ）」に戻る最後の時刻（ステップ数）も、実は<strong>逆正弦法則</strong>に従います。<br>
+                            「試合の終盤になっても同点になることが多いだろう」と思いがちですが、実際には「試合の序盤に同点になったのを最後に、その後は一度も同点にならない」確率や、「試合の終了間際に同点になる」確率が高くなります。
+                        </p>
+                        <div id="last-return-histogram-container"></div>
+                    </div>
+
+                    <div class="result-block" style="margin-top: 40px;">
+                        <h3>📈 3. 最大のリードを奪う時刻の分布</h3>
+                        <p>
+                            Aチームが試合中に「最大のリード（最大の点差）」を記録する時刻（ステップ数）も、<strong>逆正弦法則</strong>に従います。<br>
+                            「試合の中盤あたりで最大のリードを奪うだろう」という直感に反し、「試合の開始直後」や「試合の終了間際」に最大のリードを記録する確率が最も高くなります。
+                        </p>
+                        <div id="max-time-histogram-container"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="visualization.js"></script>
+    <script src="arcsine_law.js"></script>
+    <script src="../sidebar.js"></script>
+</body>
+</html>

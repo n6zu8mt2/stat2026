@@ -1,0 +1,234 @@
+/* arcsine_law.css */
+
+.description {
+    background-color: #f8f9fa;
+    border-left: 5px solid #007bff;
+    padding: 20px;
+    border-radius: 4px;
+    margin-bottom: 30px;
+    line-height: 1.6;
+}
+
+.description h2 { margin-top: 0; color: #0056b3; }
+
+/* 数式と定義のボックス */
+.formula-description {
+    background-color: #eef7ff;
+    border-left: 4px solid #1abc9c;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    border-radius: 4px;
+    font-size: 0.95em;
+}
+
+.formula-description h3 {
+    margin-top: 0;
+    color: #2c3e50;
+    font-size: 1.1em;
+}
+
+.formula-description p, .formula-description ul {
+    color: #34495e;
+    line-height: 1.6;
+}
+
+.formula-description ul {
+    margin-bottom: 0;
+}
+
+/* ライブマッチ観戦用スタイル */
+.live-match-section {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+#visualization-container {
+    margin-top: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* リード割合ゲージ */
+.live-stats {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: #f1f3f5;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.team-stat {
+    font-weight: bold;
+    text-align: center;
+    min-width: 120px;
+}
+
+.team-a { color: #d32f2f; }
+.team-b { color: #1976d2; }
+.team-stat span:not(.step-count) { font-size: 1.5em; display: block; margin-top: 5px;}
+
+.step-count {
+    font-size: 0.7em;
+    font-weight: normal;
+    color: #666;
+    display: block;
+    margin-top: 2px;
+}
+
+.live-gauge {
+    flex: 1;
+    height: 30px;
+    background-color: #bbdefb; /* ベースはBチーム色 */
+    border-radius: 15px;
+    position: relative;
+    overflow: hidden;
+    border: 2px solid #ccc;
+}
+
+.gauge-bar {
+    height: 100%;
+    width: 0%;
+    transition: width 0.1s linear;
+}
+
+.a-bar { background-color: #ffcdd2; } /* Aチームのリード割合 */
+
+.gauge-center-line {
+    position: absolute;
+    top: 0; bottom: 0; left: 50%;
+    width: 2px;
+    background-color: #333;
+    z-index: 10;
+}
+
+#walk-graph-container {
+    display: flex;
+    justify-content: center;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+#walk-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+}
+
+.status-text {
+    font-weight: bold;
+    color: #555;
+}
+
+/* 共通コントロールパネル */
+.control-panel {
+    background-color: #e9ecef;
+    padding: 20px;
+    border-radius: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.control-group label {
+    font-weight: bold;
+    color: #495057;
+}
+
+.control-group input[type="number"] {
+    width: 150px;
+    padding: 8px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 1.1em;
+}
+
+.action-btn {
+    padding: 10px 20px;
+    font-size: 1em;
+    font-weight: bold;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.action-btn:hover { background-color: #0056b3; }
+.action-btn:active { transform: translateY(2px); box-shadow: none; }
+.action-btn:disabled { background-color: #6c757d; cursor: not-allowed; transform: none;}
+
+.large-btn {
+    font-size: 1.2em;
+    padding: 12px 30px;
+    background-color: #28a745;
+}
+.large-btn:hover { background-color: #218838; }
+
+/* 結果セクション */
+.result-block {
+    margin-top: 30px;
+    padding: 20px;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.result-block h3 {
+    margin-top: 0;
+    color: #343a40;
+    border-bottom: 2px solid #28a745;
+    padding-bottom: 10px;
+}
+
+/* 複数のヒストグラムコンテナに対応 */
+#lead-time-histogram-container,
+#last-return-histogram-container,
+#max-time-histogram-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+#lead-time-table-container {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+#lead-time-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#lead-time-table th, #lead-time-table td {
+    border: 1px solid #eee;
+    padding: 10px;
+    text-align: center;
+}
+
+#lead-time-table thead th {
+    background-color: #f8f9fa;
+    position: sticky;
+    top: 0;
+    box-shadow: 0 1px 0 #ddd;
+}
