@@ -65,30 +65,43 @@
                 </div>
 
                 <div class="live-match-section">
-                    <h2>⚽ ライブマッチ観戦（1試合の動きを見る）</h2>
+                    <h2>⚽ ライブマッチ観戦（3つの逆正弦法則を追跡）</h2>
                     <p>下のボタンを押すと、互角のチーム同士の100ターンの試合がリアルタイムで描画されます。</p>
                     <ul>
                         <li><strong>横軸（時間 $t$）</strong>: 試合の進行度（ステップ数）を表します。</li>
                         <li><strong>縦軸（点差 $S_t$）</strong>: Aチームのリード（Aの得点 - Bの得点）を表します。</li>
                     </ul>
-                    <p>グラフが中央の0ラインより上（赤色領域）にある間がAチームのリード時間です。<br>
-                    本当に「リード時間が半々」にならないのか、ゲージの偏りに注目して観察してください。</p>
+                    <p>この1試合から、逆正弦法則に従う<strong>3つの重要な指標</strong>を同時にリアルタイムで観測します。それぞれが50%付近で止まらず、極端な値（0%や100%付近）に偏りやすいことを確認してください。</p>
                     
                     <div id="visualization-container">
-                        <div class="live-stats">
-                            <div class="team-stat team-a">
-                                Aチームリード<br>
-                                <span id="live-a-pct">0%</span>
-                                <span class="step-count">( <span id="live-a-steps">0</span> / <span id="live-total-steps-a">0</span> step )</span>
+                        
+                        <div class="stats-container">
+                            <div class="live-stats-box">
+                                <h4>1. Aチームがリードした時間 <span class="dot-red"></span></h4>
+                                <div class="stat-values">
+                                    <span class="big-val" id="live-lead-pct">0%</span>
+                                    <span class="small-val">(<span id="live-lead-steps">0</span>/<span class="total-steps-val">100</span>)</span>
+                                </div>
+                                <div class="simple-gauge"><div id="gauge-bar-lead" class="gauge-fill red-fill"></div></div>
                             </div>
-                            <div class="live-gauge">
-                                <div id="gauge-bar-a" class="gauge-bar a-bar"></div>
-                                <div class="gauge-center-line"></div>
+                            
+                            <div class="live-stats-box">
+                                <h4>2. 最後に同点に戻った時刻 <span class="dot-green"></span></h4>
+                                <div class="stat-values">
+                                    <span class="big-val" id="live-last-return-pct">0%</span>
+                                    <span class="small-val">(<span id="live-last-return">0</span>/<span class="total-steps-val">100</span>)</span>
+                                </div>
+                                <div class="simple-gauge"><div id="gauge-bar-return" class="gauge-fill green-fill"></div></div>
                             </div>
-                            <div class="team-stat team-b">
-                                Bチームリード<br>
-                                <span id="live-b-pct">0%</span>
-                                <span class="step-count">( <span id="live-b-steps">0</span> / <span id="live-total-steps-b">0</span> step )</span>
+
+                            <div class="live-stats-box">
+                                <h4>3. 最大のリードを奪った時刻 <span class="dot-orange"></span></h4>
+                                <div class="stat-values">
+                                    <span class="big-val" id="live-max-time-pct">0%</span>
+                                    <span class="small-val">(<span id="live-max-time">0</span>/<span class="total-steps-val">100</span>)</span>
+                                    <span class="small-val" style="display:block; margin-top:2px;">(最大リード: <strong id="live-max-val">0</strong> 点)</span>
+                                </div>
+                                <div class="simple-gauge"><div id="gauge-bar-max" class="gauge-fill orange-fill"></div></div>
                             </div>
                         </div>
                         

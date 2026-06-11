@@ -52,60 +52,75 @@
     gap: 15px;
 }
 
-/* リード割合ゲージ */
-.live-stats {
+/* --- 新しい3つの指標パネルのスタイル --- */
+.stats-container {
     display: flex;
-    align-items: center;
+    flex-wrap: wrap;
     gap: 15px;
-    background: #f1f3f5;
+    margin-bottom: 10px;
+}
+
+.live-stats-box {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
     padding: 15px;
     border-radius: 8px;
-}
-
-.team-stat {
-    font-weight: bold;
-    text-align: center;
-    min-width: 120px;
-}
-
-.team-a { color: #d32f2f; }
-.team-b { color: #1976d2; }
-.team-stat span:not(.step-count) { font-size: 1.5em; display: block; margin-top: 5px;}
-
-.step-count {
-    font-size: 0.7em;
-    font-weight: normal;
-    color: #666;
-    display: block;
-    margin-top: 2px;
-}
-
-.live-gauge {
     flex: 1;
-    height: 30px;
-    background-color: #bbdefb; /* ベースはBチーム色 */
-    border-radius: 15px;
-    position: relative;
-    overflow: hidden;
-    border: 2px solid #ccc;
+    min-width: 250px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
-.gauge-bar {
+.live-stats-box h4 {
+    margin: 0 0 10px 0;
+    color: #343a40;
+    font-size: 1.05em;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.stat-values {
+    margin-bottom: 12px;
+}
+
+.big-val {
+    font-size: 2.2em;
+    font-weight: bold;
+    color: #212529;
+}
+
+.small-val {
+    color: #6c757d;
+    font-size: 0.95em;
+    margin-left: 5px;
+}
+
+/* 色付きの丸いドット */
+.dot-red { display: inline-block; width: 12px; height: 12px; background: #e53935; border-radius: 50%; }
+.dot-green { display: inline-block; width: 12px; height: 12px; background: #4caf50; border-radius: 50%; }
+.dot-orange { display: inline-block; width: 12px; height: 12px; background: #ff9800; border-radius: 50%; }
+
+/* ミニゲージ */
+.simple-gauge {
+    width: 100%;
+    height: 12px;
+    background: #e9ecef;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid #ccc;
+}
+
+.gauge-fill {
     height: 100%;
     width: 0%;
-    transition: width 0.1s linear;
+    transition: width 0.1s;
 }
 
-.a-bar { background-color: #ffcdd2; } /* Aチームのリード割合 */
+.red-fill { background: #e53935; }
+.green-fill { background: #4caf50; }
+.orange-fill { background: #ff9800; }
 
-.gauge-center-line {
-    position: absolute;
-    top: 0; bottom: 0; left: 50%;
-    width: 2px;
-    background-color: #333;
-    z-index: 10;
-}
-
+/* グラフエリア */
 #walk-graph-container {
     display: flex;
     justify-content: center;
