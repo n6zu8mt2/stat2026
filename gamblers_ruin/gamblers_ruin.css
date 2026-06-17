@@ -1,0 +1,239 @@
+/* gamblers_ruin.css */
+
+.description {
+    background-color: #f8f9fa;
+    border-left: 5px solid #ff9800;
+    padding: 20px;
+    border-radius: 4px;
+    margin-bottom: 30px;
+    line-height: 1.6;
+}
+
+.description h2 { margin-top: 0; color: #e65100; }
+
+/* 数式と定義のボックス */
+.formula-description {
+    background-color: #fff3e0;
+    border-left: 4px solid #ffb300;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    border-radius: 4px;
+    font-size: 0.95em;
+}
+
+.formula-description h3 {
+    margin-top: 0;
+    color: #ef6c00;
+    font-size: 1.1em;
+    border-bottom: 1px dashed #ffb300;
+    padding-bottom: 5px;
+}
+
+.formula-description p, .formula-description ul {
+    color: #3e2723;
+    line-height: 1.6;
+}
+
+/* ライブマッチ観戦用スタイル */
+.live-match-section {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+#visualization-container {
+    margin-top: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.live-stats {
+    display: flex;
+    justify-content: space-around;
+    background: #f1f3f5;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.stat-box {
+    text-align: center;
+    font-weight: bold;
+    color: #495057;
+}
+
+.stat-box span {
+    font-size: 2em;
+    font-family: monospace;
+    display: block;
+    margin-top: 5px;
+}
+
+#walk-graph-container {
+    display: flex;
+    justify-content: center;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+#walk-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.status-text {
+    font-weight: bold;
+    color: #555;
+    font-size: 1.1em;
+    margin-left: 10px;
+}
+
+/* コントロールパネル */
+.control-panel {
+    background-color: #e3f2fd;
+    padding: 20px;
+    border-radius: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: flex-start;
+    justify-content: space-between;
+    border: 1px solid #bbdefb;
+}
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    width: 45%;
+}
+
+.control-group label {
+    font-weight: bold;
+    color: #0d47a1;
+}
+
+.control-group input[type="number"] {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #90caf9;
+    border-radius: 4px;
+    font-size: 1.1em;
+}
+
+.control-group small {
+    color: #555;
+}
+
+.action-btn {
+    padding: 10px 15px;
+    font-size: 0.95em;
+    font-weight: bold;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.action-btn:hover:not(:disabled) { background-color: #0056b3; }
+.action-btn:active:not(:disabled) { transform: translateY(2px); box-shadow: none; }
+.action-btn:disabled { background-color: #6c757d; cursor: not-allowed; transform: none; box-shadow: none; opacity: 0.7; }
+
+#skip-live-btn:hover:not(:disabled) { background-color: #f57c00 !important; }
+#stop-live-btn:hover:not(:disabled) { background-color: #d32f2f !important; }
+
+.large-btn {
+    font-size: 1.2em;
+    padding: 12px 40px;
+    background-color: #28a745;
+}
+.large-btn:hover:not(:disabled) { background-color: #218838; }
+
+/* 結果セクション */
+.result-block {
+    margin-top: 30px;
+    padding: 20px;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.result-block h3 {
+    margin-top: 0;
+    color: #343a40;
+    border-bottom: 2px solid #28a745;
+    padding-bottom: 10px;
+}
+
+.comparison-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.card {
+    flex: 1;
+    min-width: 300px;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    border: 1px solid #ddd;
+}
+
+.card.theory {
+    background-color: #f1f8e9;
+    border-color: #c5e1a5;
+}
+
+.card.actual {
+    background-color: #ffebee;
+    border-color: #ef9a9a;
+}
+
+.card h4 {
+    margin: 0 0 10px 0;
+    color: #333;
+}
+
+.card .value {
+    font-size: 2.5em;
+    font-weight: bold;
+    font-family: monospace;
+    margin-bottom: 10px;
+}
+
+.card .detail {
+    color: #666;
+    font-weight: bold;
+}
+
+.card .formula {
+    margin-top: 15px;
+    font-size: 0.9em;
+    color: #444;
+    overflow-x: auto;
+}
+
+.insight-box {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #fff3cd;
+    border-left: 5px solid #ffc107;
+    border-radius: 4px;
+    font-weight: bold;
+    color: #856404;
+    line-height: 1.5;
+}

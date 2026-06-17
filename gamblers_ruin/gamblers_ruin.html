@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ギャンブラーの破産問題 | 確率シミュレーター</title>
+    <link rel="stylesheet" href="../common.css">
+    <link rel="stylesheet" href="gamblers_ruin.css">
+    <script>
+        MathJax = {
+          tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
+          svg: { fontCache: 'global' }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.2/p5.min.js"></script>
+</head>
+<body>
+    <div class="page-wrapper">
+        <div id="sidebar-placeholder" data-root-path="../"></div>
+
+        <div class="main-content">
+            <div class="header">
+                <h1>ギャンブラーの破産問題</h1>
+                <p>〜カジノが絶対に儲かる数学的理由〜</p>
+            </div>
+            
+            <div class="back-link">
+                <a href="../index.html">← トップページに戻る</a>
+            </div>
+
+            <div class="container">
+                <div class="description">
+                    <h2>💸 破産の確率とは？</h2>
+                    <p>
+                        AとBの2人がゲームを行います。1回のゲームでAが勝つ確率は $p$、Bが勝つ確率は $q = 1-p$ です。勝者は敗者から1円をもらいます。<br>
+                        Aの最初の所持金を $k$ 円、全体の資金を $N$ 円（Bの初期資金は $N-k$ 円）とし、どちらかの所持金が0円になった時点でゲーム終了とします。<br>
+                        このとき、Aの所持金が0円になる（Aが破産する）確率 $P_k$ はどうなるでしょうか？
+                    </p>
+                    
+                    <div class="formula-description">
+                        <h3>数学的な結論（漸化式の解）</h3>
+                        <p>
+                            各回のゲームが独立であるという性質（マルコフ性）から、漸化式 $P_k = p P_{k+1} + q P_{k-1}$ が成り立ちます。<br>
+                            これを解くと、Aが破産する確率は次のように求まります。
+                        </p>
+                        <ul>
+                            <li><strong>公平なゲーム ($p = q = 1/2$) の場合:</strong><br>
+                                $$ P_k = \frac{N-k}{N} = 1 - \frac{k}{N} $$
+                                資金力（$N$ に対する $k$ の割合）だけで勝率が決まります。
+                            </li>
+                            <li><strong>不公平なゲーム ($p \neq q$) の場合:</strong><br>
+                                $$ P_k = \frac{ \left(\frac{q}{p}\right)^k - \left(\frac{q}{p}\right)^N }{ 1 - \left(\frac{q}{p}\right)^N } $$
+                            </li>
+                        </ul>
+                        
+                        <h3>カジノが必ず勝つ理由</h3>
+                        <p>
+                            $\alpha = \frac{q}{p}$ とおきます。ルーレットなど、ギャンブルはプレイヤーがほんの少し不利（$p < q$、つまり $\alpha > 1$）に設定されています。<br>
+                            相手が巨大なカジノ（全体の資金 $N \to \infty$）だとすると、プレイヤーの破産確率はどうなるでしょうか？
+                            $$ P_k \approx \lim_{N \to \infty} \frac{ \alpha^k - \alpha^N }{ 1 - \alpha^N } = 1 $$
+                            なんと、初期資金 $k$ がいくらあっても、<strong>「少しでも不利な勝負を、資金が無限に近い相手に挑み続ければ、長期的には確率100%で破産する」</strong>ことが証明されます。
+                        </p>
+                    </div>
+                </div>
+
+                <div class="live-match-section">
+                    <h2>🎰 ライブ観戦（1人のギャンブラーの運命）</h2>
+                    <p>下のボタンを押すと、1人のプレイヤーがゲームを続ける様子（所持金の推移）をリアルタイムで描画します。<br>
+                    所持金が $0$ になれば「破産」、$N$ に達すれば「勝利（勝ち逃げ）」です。長引く場合はスキップや中断もできます。</p>
+                    
+                    <div id="visualization-container">
+                        <div class="live-stats">
+                            <div class="stat-box">現在の所持金<br><span id="live-money" style="color:#1976d2;">0</span> 円</div>
+                            <div class="stat-box">プレイ回数<br><span id="live-turns">0</span> 回</div>
+                        </div>
+                        
+                        <div id="walk-graph-container"></div>
+                        
+                        <div id="walk-controls">
+                            <button id="start-live-btn" class="action-btn">▶ 新しい挑戦者をシミュレーション</button>
+                            <button id="skip-live-btn" class="action-btn" style="background-color: #ff9800;" disabled>⏭ 結果までスキップ</button>
+                            <button id="stop-live-btn" class="action-btn" style="background-color: #e53935;" disabled>⏹ 途中棄権</button>
+                            <span id="live-status" class="status-text">待機中...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings" style="margin-top: 40px;">
+                    <h2>📊 大規模シミュレーション（破産確率の検証）</h2>
+                    <p>上記のギャンブルを、今度は<strong>10,000人</strong>のプレイヤーが同時に挑戦したと仮定して、何人が破産し、何人が勝ち逃げできたかを集計します。数学の理論値と比較してみましょう。</p>
+                    
+                    <div class="control-panel">
+                        <div class="control-group">
+                            <label for="prob_p">プレイヤーの勝率 p:</label>
+                            <input type="number" id="prob_p" value="0.49" min="0.01" max="0.99" step="0.01">
+                            <small>※ルーレットの赤黒賭けは約0.486です</small>
+                        </div>
+                        <div class="control-group">
+                            <label for="init_k">プレイヤーの初期資金 k:</label>
+                            <input type="number" id="init_k" value="10" min="1" step="1">
+                        </div>
+                        <div class="control-group">
+                            <label for="total_n">全体の資金 N (目標額):</label>
+                            <input type="number" id="total_n" value="100" min="2" step="10">
+                            <small>※相手の資金は N - k になります</small>
+                        </div>
+                        <div class="control-group">
+                            <label for="num_simulations">シミュレーション人数:</label>
+                            <input type="number" id="num_simulations" value="10000" min="1000" step="1000">
+                        </div>
+                        <div class="button-group" style="width: 100%; text-align: center; margin-top: 15px;">
+                            <button id="run_simulation_btn" class="action-btn large-btn">大規模シミュレーション実行</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="results-section" id="results-area" style="display: none;">
+                    <div class="result-block">
+                        <h3>📈 シミュレーション結果</h3>
+                        
+                        <div class="comparison-cards">
+                            <div class="card theory">
+                                <h4>理論値（計算上の破産確率）</h4>
+                                <div class="value" id="theory-ruin-prob">-- %</div>
+                                <div class="formula" id="theory-formula"></div>
+                            </div>
+                            <div class="card actual">
+                                <h4>実測値（今回の破産確率）</h4>
+                                <div class="value" id="actual-ruin-prob" style="color:#d32f2f;">-- %</div>
+                                <div class="detail">
+                                    破産: <span id="count-ruin">0</span>人 / 勝ち逃げ: <span id="count-win">0</span>人
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="insight-box" id="insight-text">
+                            </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="gamblers_ruin.js"></script>
+    <script src="../sidebar.js"></script>
+</body>
+</html>

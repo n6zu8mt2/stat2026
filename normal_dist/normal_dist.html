@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>正規分布シミュレーター | 統計学の基礎</title>
+    <link rel="stylesheet" href="../common.css">
+    <link rel="stylesheet" href="normal_dist.css">
+    <script>
+        MathJax = {
+          tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
+          svg: { fontCache: 'global' }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.2/p5.min.js"></script>
+</head>
+<body>
+    <div class="page-wrapper">
+        <div id="sidebar-placeholder" data-root-path="../"></div>
+
+        <div class="main-content">
+            <div class="header">
+                <h1>正規分布シミュレーター</h1>
+                <p>〜 平均 $\mu$ と標準偏差 $\sigma$ が作る「ベル型カーブ」〜</p>
+            </div>
+            
+            <div class="back-link">
+                <a href="../index.html">← トップページに戻る</a>
+            </div>
+
+            <div class="container">
+                <section class="description">
+                    <h2>自然界に最もよく現れる分布 📊</h2>
+                    <p>
+                        身長、テストの点数、製品の誤差など、世の中の多くのデータは平均値付近に最も多く集まり、そこから離れるほど数が少なくなる「釣鐘型（ベルカーブ）」の分布になります。これを<strong>正規分布（Normal Distribution）</strong>と呼びます。
+                    </p>
+                    
+                    <div class="formula-description">
+                        <h3>確率密度関数 $f(x)$</h3>
+                        <p>正規分布は、<strong>平均（$\mu$: ミュー）</strong>と<strong>標準偏差（$\sigma$: シグマ）</strong>の2つのパラメータだけで形が完全に決まります。数式で書くと以下のようになります。</p>
+                        $$ f(x) = \frac{1}{\sigma \sqrt{2\pi}} \exp\left( -\frac{(x - \mu)^2}{2\sigma^2} \right) $$
+                        <ul>
+                            <li><strong>平均 $\mu$ (mean)</strong>：グラフの「中心（山の頂点）の位置」を左右に動かします。</li>
+                            <li><strong>標準偏差 $\sigma$ (standard deviation)</strong>：グラフの「広がり具合（山の高さと裾野の広さ）」を決めます。$\sigma$ が大きいほどデータは散らばり、山は低く平らになります。</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <section class="simulator-section">
+                    <div class="controls-panel">
+                        <h3>パラメータ設定</h3>
+                        
+                        <div class="control-group">
+                            <div class="label-row">
+                                <label for="slider-mu">平均 $\mu$ (山の中心位置): <span id="val-mu" class="val-display">0.0</span></label>
+                            </div>
+                            <input type="range" id="slider-mu" min="-10" max="10" step="0.1" value="0">
+                        </div>
+
+                        <div class="control-group">
+                            <div class="label-row">
+                                <label for="slider-sigma">標準偏差 $\sigma$ (散らばり具合): <span id="val-sigma" class="val-display">1.0</span></label>
+                            </div>
+                            <input type="range" id="slider-sigma" min="0.5" max="5" step="0.1" value="1.0">
+                        </div>
+                        
+                        <hr style="margin: 20px 0; border: none; border-top: 1px dashed #ccc;">
+                        
+                        <h3>表示モード（確率・面積の計算）</h3>
+                        <div class="mode-selector">
+                            <label><input type="radio" name="calc-mode" value="empirical" checked> 経験則（$\pm 1\sigma, 2\sigma, 3\sigma$）を表示</label>
+                            <label><input type="radio" name="calc-mode" value="custom"> 範囲を指定して確率を計算</label>
+                        </div>
+
+                        <div id="empirical-controls" class="sub-controls">
+                            <label class="check-container"><input type="checkbox" id="check-1sigma" checked> $\mu \pm 1\sigma$ の範囲を塗る</label>
+                            <label class="check-container"><input type="checkbox" id="check-2sigma"> $\mu \pm 2\sigma$ の範囲を塗る</label>
+                            <label class="check-container"><input type="checkbox" id="check-3sigma"> $\mu \pm 3\sigma$ の範囲を塗る</label>
+                        </div>
+
+                        <div id="custom-controls" class="sub-controls" style="display: none;">
+                            <div class="range-inputs">
+                                <label>下限 $a$ : <input type="number" id="input-a" value="-1.96" step="0.1"></label>
+                                <span style="margin:0 10px;">$\le X \le$</span>
+                                <label>上限 $b$ : <input type="number" id="input-b" value="1.96" step="0.1"></label>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="visualization-panel">
+                        <div id="canvas-container"></div>
+                        
+                        <div class="result-box">
+                            <h4>計算結果 (色を塗った部分の面積)</h4>
+                            <div id="result-text" class="result-value">-- %</div>
+                            <p class="result-desc" id="result-desc">--</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+    <script src="normal_dist.js"></script>
+    <script src="../sidebar.js"></script>
+</body>
+</html>
