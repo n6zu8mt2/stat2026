@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>一様分布シミュレーター </title>
+    <link rel="stylesheet" href="../common.css">
+    <link rel="stylesheet" href="uniform_dist.css">
+    <script>
+        MathJax = {
+          tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
+          svg: { fontCache: 'global' }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.2/p5.min.js"></script>
+</head>
+<body>
+    <div class="page-wrapper">
+        <div id="sidebar-placeholder" data-root-path="../"></div>
+
+        <div class="main-content">
+            <div class="header">
+                <h1>一様分布シミュレーター</h1>
+            </div>
+            <div class="container">
+                <h2>連続一様分布 $U(a, b)$</h2>
+                
+                <div class="description" style="background-color: #f8f9fa; padding: 15px; border-left: 5px solid #007bff; margin-bottom: 20px;">
+                    <p>連続一様分布 $U(a, b)$ は、区間 $[a, b]$ において、どの値も同じ確率密度で現れる分布です。</p>
+                    <ul>
+                        <li><strong>確率密度関数 (PDF):</strong> $f(x) = \frac{1}{b-a}$ （$a \le x \le b$ のとき）</li>
+                    </ul>
+                    <p>パラメータ $a$ と $b$ を変更すると、青色で描かれた確率密度関数の幅と高さが変化します。<br>
+                    「1回生成」または「自動生成」を実行すると、選ばれた実数が赤いヒストグラムとして積み上がり、試行回数を重ねるにつれて理論値（青い枠）の形に近づいていくことを確認しましょう。</p>
+                </div>
+                
+                <div class="control-panel">
+                    <div class="input-group">
+                        <label for="param-a">下限 $a$ :</label>
+                        <input type="number" id="param-a" value="0" step="1">
+                    </div>
+                    <div class="input-group">
+                        <label for="param-b">上限 $b$ :</label>
+                        <input type="number" id="param-b" value="10" step="1">
+                    </div>
+                    <button id="generate-btn" class="action-btn large-btn">1回生成</button>
+                    <button id="auto-btn" class="action-btn" style="background-color: #28a745;">自動生成 (オン/オフ)</button>
+                    <button id="reset-btn" class="action-btn">リセット</button>
+                </div>
+
+                <div class="result-block">
+                    <div class="stats-container">
+                        <p>生成回数: <span id="count-val" class="bold-text">0</span> 回</p>
+                        <p>最新の生成値: <span id="latest-val" class="bold-text">-</span></p>
+                    </div>
+                    <div id="canvas-container"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="../sidebar.js"></script>
+    <script src="uniform_dist.js"></script>
+</body>
+</html>
