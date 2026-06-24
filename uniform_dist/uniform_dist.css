@@ -11,22 +11,6 @@
 
 .description h2 { margin-top: 0; color: #00796b; }
 
-.formula-description {
-    background-color: #e0f2f1;
-    border-left: 4px solid #26a69a;
-    padding: 1.5rem;
-    margin: 1.5rem 0;
-    border-radius: 4px;
-}
-
-.formula-description h3 {
-    margin-top: 0;
-    color: #004d40;
-    font-size: 1.1em;
-    border-bottom: 1px dashed #b2dfdb;
-    padding-bottom: 5px;
-}
-
 .simulator-section {
     display: flex;
     flex-wrap: wrap;
@@ -36,7 +20,7 @@
 
 .controls-panel {
     flex: 1;
-    min-width: 300px;
+    min-width: 320px;
     background: #e0f2f1;
     padding: 20px;
     border-radius: 8px;
@@ -92,9 +76,7 @@ input[type="range"] {
     transition: background-color 0.2s;
 }
 
-.sample-btn:hover {
-    background-color: #00796b;
-}
+.sample-btn:hover { background-color: #00796b; }
 
 .clear-btn {
     background-color: #e53935;
@@ -108,24 +90,43 @@ input[type="range"] {
     transition: background-color 0.2s;
 }
 
-.clear-btn:hover {
-    background-color: #c62828;
-}
+.clear-btn:hover { background-color: #c62828; }
 
 .visualization-panel {
     flex: 2;
     min-width: 400px;
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 20px;
 }
 
-#canvas-container {
+.graph-box {
     background: #fff;
     border: 1px solid #ccc;
     border-radius: 8px;
-    overflow: hidden;
+    padding: 15px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.graph-title {
+    margin-top: 0;
+    color: #2c3e50;
+    margin-bottom: 5px;
+    border-left: 4px solid #009688;
+    padding-left: 8px;
+}
+
+.graph-desc {
+    font-size: 0.9em;
+    color: #666;
+    margin-bottom: 15px;
+}
+
+.canvas-wrapper {
+    display: flex;
+    justify-content: center;
+    border: 1px solid #eee;
+    background-color: #fafafa;
 }
 
 .result-box {
@@ -140,8 +141,6 @@ input[type="range"] {
     margin-top: 0;
     color: #2c3e50;
     margin-bottom: 10px;
-    border-left: 4px solid #009688;
-    padding-left: 8px;
 }
 
 .stats-table {
@@ -156,15 +155,11 @@ input[type="range"] {
     text-align: left;
 }
 
-.stats-table th {
-    background-color: #f2f2f2;
-    color: #333;
-}
+.stats-table th { background-color: #f2f2f2; color: #333; }
+.stats-table tr:nth-child(even) { background-color: #f9f9f9; }
 
-.stats-table tr:nth-child(even) {
-    background-color: #f9f9f9;
-}
-
-.stats-table td:last-child, .stats-table td:nth-child(2) {
+.emp-val {
     font-family: monospace;
+    font-weight: bold;
+    color: #e53935;
 }

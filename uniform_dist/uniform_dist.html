@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>一様分布シミュレーター | 統計学の基礎</title>
+    <link rel="stylesheet" href="../common.css">
+    <link rel="stylesheet" href="uniform_dist.css">
+    <script>
+        MathJax = {
+          tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
+          svg: { fontCache: 'global' }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.2/p5.min.js"></script>
+</head>
+<body>
+    <div class="page-wrapper">
+        <div id="sidebar-placeholder" data-root-path="../"></div>
+
+        <div class="main-content">
+            <div class="header">
+                <h1>一様分布シミュレーター</h1>
+                <p>〜 すべての値が「等しい確率密度」で現れる分布 〜</p>
+            </div>
+            
+            <div class="back-link">
+                <a href="../index.html">← トップページに戻る</a>
+            </div>
+
+            <div class="container">
+                <section class="description">
+                    <h2>連続一様分布（Uniform Distribution）とは？</h2>
+                    <p>ある範囲 $[a, b]$ の間、どの値もまったく同じ「現れやすさ（確率密度）」を持っている連続確率分布です。</p>
+                    <p>ここでは、<strong>「① 実際に数が出現した回数（度数）」</strong>と<strong>「② 全体を1としてならした確率密度」</strong>の2つのグラフを比較して、サンプル数が増えたときにどのような変化が起きるか観察しましょう。</p>
+                </section>
+
+                <section class="simulator-section">
+                    <div class="controls-panel">
+                        <h3>パラメータ設定 (0.1刻み)</h3>
+                        <div class="input-group-custom">
+                            <label for="slider-a">下限 $a$ : <span id="val-a">2.0</span></label>
+                            <input type="range" id="slider-a" min="0" max="8" step="0.1" value="2.0">
+                        </div>
+                        <div class="input-group-custom">
+                            <label for="slider-b">上限 $b$ : <span id="val-b">8.0</span></label>
+                            <input type="range" id="slider-b" min="2" max="10" step="0.1" value="8.0">
+                        </div>
+
+                        <h3 style="margin-top: 20px;">ランダムサンプリング（数の生成）</h3>
+                        <div class="sampling-buttons">
+                            <button id="btn-sample-1" class="sample-btn">1回生成</button>
+                            <button id="btn-sample-100" class="sample-btn">100回生成</button>
+                            <button id="btn-sample-1000" class="sample-btn">1000回生成</button>
+                            <button id="btn-sample-10000" class="sample-btn">10000回生成</button>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <button id="btn-clear" class="clear-btn">サンプルをクリア</button>
+                        </div>
+
+                        <div class="result-box" style="margin-top: 20px;">
+                            <h4>シミュレーション統計データ</h4>
+                            <table class="stats-table">
+                                <thead>
+                                    <tr>
+                                        <th>指標</th>
+                                        <th>理論値</th>
+                                        <th>実験値</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>総サンプル数</td>
+                                        <td>&infin;</td>
+                                        <td id="stat-count" class="emp-val">0</td>
+                                    </tr>
+                                    <tr>
+                                        <td>平均値 (Mean)</td>
+                                        <td id="theory-mean">5.000</td>
+                                        <td id="sample-mean" class="emp-val">--</td>
+                                    </tr>
+                                    <tr>
+                                        <td>分散 (Variance)</td>
+                                        <td id="theory-var">3.000</td>
+                                        <td id="sample-var" class="emp-val">--</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="visualization-panel">
+                        <!-- 上のグラフ：出現回数（度数） -->
+                        <div class="graph-box">
+                            <h4 class="graph-title">① 出現回数（度数）のヒストグラム</h4>
+                            <p class="graph-desc">サンプル数が増えるほど、棒がどんどん高く成長していきます。</p>
+                            <div id="canvas-freq" class="canvas-wrapper"></div>
+                        </div>
+                        
+                        <!-- 下のグラフ：確率密度関数 -->
+                        <div class="graph-box">
+                            <h4 class="graph-title">② 確率密度関数のヒストグラム（面積＝1）</h4>
+                            <p class="graph-desc">全体の面積が1になるように「割合」で高さを調整したものです。サンプル数を増やすと、青緑色の枠線（理論上の確率密度関数）に形が近づいていきます。</p>
+                            <div id="canvas-density" class="canvas-wrapper"></div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+    <script src="uniform_dist.js"></script>
+    <script src="../sidebar.js"></script>
+</body>
+</html>

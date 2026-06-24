@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>試験の偏差値シミュレーター</title>
+    <link rel="stylesheet" href="../common.css">
+    <link rel="stylesheet" href="deviation_simulator.css">
+    <script>
+        window.MathJax = {
+          tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
+          svg: { fontCache: 'global' },
+          startup: { typeset: false } // 初期レンダリングを制御
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.2/p5.min.js"></script>
+</head>
+<body>
+    <div class="page-wrapper">
+        <div id="sidebar-placeholder" data-root-path="../"></div>
+
+        <div class="main-content">
+            <div class="header">
+                <h1>試験の偏差値シミュレーター</h1>
+                <p>〜 試験の点数と偏差値の対応関係を視覚化 〜</p>
+            </div>
+            
+            <div class="back-link">
+                <a href="../index.html">← トップページに戻る</a>
+            </div>
+
+            <div class="container">
+                <section class="description">
+                    <h2>試験の点数から偏差値への変換</h2>
+                    <p>試験の点数を確率変数 $X$ とし、それが正規分布に従うと仮定します。ある点数 $X$ に対する偏差値 $T$ は次の式で求められます。</p>
+                    <p style="text-align: center; font-size: 1.2em; margin: 15px 0;"><strong>$T = \frac{X - E[X]}{\sigma} \times 10 + 50$</strong></p>
+                    <p>偏差値は、元の試験の平均点が何点であっても、<strong>「平均を50、標準偏差を10」の正規分布 $N(50, 10^2)$</strong> にスケールを揃えることで、集団の中での相対的な位置をわかりやすくするための指標です。</p>
+                </section>
+
+                <section class="simulator-section">
+                    <div class="controls-panel">
+                        <h3>1. テストの全体設定</h3>
+                        <div class="setting-group-inline">
+                            <div class="input-item">
+                                <label for="input-mu">平均点 ($\mu$)</label>
+                                <input type="number" id="input-mu" value="65" step="1">
+                            </div>
+                            <div class="input-item">
+                                <label for="input-sigma">標準偏差 ($\sigma$)</label>
+                                <input type="number" id="input-sigma" value="8" step="1" min="0.1">
+                            </div>
+                            <div class="input-item">
+                                <label for="input-total">受験者数 ($N$人)</label>
+                                <input type="number" id="input-total" value="1000" step="100" min="1">
+                            </div>
+                        </div>
+
+                        <h3>2. 自分の得点と偏差値</h3>
+                        <div class="setting-group" style="background: #fff; padding: 10px; border-radius: 6px; border: 1px solid #c8e6c9;">
+                            <label for="input-myscore" class="main-label">自分の得点を入力</label>
+                            <input type="number" id="input-myscore" placeholder="例: 75" step="1" style="font-size: 1.2em; padding: 8px; width: 100%;">
+                            <div style="text-align: center; margin-top: 10px;">
+                                <span style="font-weight: bold; color: #2e7d32;">あなたの偏差値:</span>
+                                <span id="res-my-dev" style="font-size: 1.6em; font-weight: bold; color: #e65100; margin-left: 10px;">--</span>
+                            </div>
+                        </div>
+
+                        <h3>3. 調べたい範囲の指定</h3>
+                        <div class="setting-group">
+                            <label class="main-label">ワンクリック範囲選択</label>
+                            <div class="quick-buttons">
+                                <button type="button" class="sigma-btn" data-type="1sigma">1σ (偏差値40〜60)</button>
+                                <button type="button" class="sigma-btn" data-type="2sigma">2σ (偏差値30〜70)</button>
+                                <button type="button" class="sigma-btn" data-type="3sigma">3σ (偏差値20〜80)</button>
+                            </div>
+                        </div>
+
+                        <div class="setting-group">
+                            <label class="main-label">自由な点数範囲指定</label>
+                            <div class="input-row">
+                                <div class="input-group-custom">
+                                    <label for="input-x1">下限点 $X_1$</label>
+                                    <input type="number" id="input-x1" value="57" step="1">
+                                </div>
+                                <span class="symbol">$\le X \le$</span>
+                                <div class="input-group-custom">
+                                    <label for="input-x2">上限点 $X_2$</label>
+                                    <input type="number" id="input-x2" value="73" step="1">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="result-box">
+                            <h4>範囲の計算結果</h4>
+                            <table class="stats-table">
+                                <tbody>
+                                    <tr>
+                                        <td>対応する偏差値 ($T$) の範囲</td>
+                                        <td id="res-t-range" class="calc-val">40.0 $\le T \le$ 60.0</td>
+                                    </tr>
+                                    <tr>
+                                        <td>その範囲にいる割合</td>
+                                        <td id="res-prob" class="calc-val emp-val">68.27 %</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="font-weight: bold; color: #d32f2f;"><span id="label-total-people">1000</span>人中の人数</td>
+                                        <td id="res-people" class="calc-val emp-val-large">約 683 人</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="visualization-panel">
+                        <div class="graph-box">
+                            <h4 class="graph-title score-title">① 試験の点数の分布 $X \sim N(\mu, \sigma^2)$</h4>
+                            <div id="canvas-score" class="canvas-wrapper"></div>
+                        </div>
+                        
+                        <div class="graph-arrow">
+                            <p>偏差値化 $T = \frac{X - \mu}{\sigma} \times 10 + 50$</p>
+                            <span>▼</span>
+                        </div>
+
+                        <div class="graph-box">
+                            <h4 class="graph-title dev-title">② 偏差値の分布 $T \sim N(50, 10^2)$</h4>
+                            <div id="canvas-dev" class="canvas-wrapper"></div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+    <script src="deviation_simulator.js"></script>
+    <script src="../sidebar.js"></script>
+</body>
+</html>

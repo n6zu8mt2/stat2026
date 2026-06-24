@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IQ分布と標準正規分布の比較シミュレーター</title>
+    <link rel="stylesheet" href="../common.css">
+    <link rel="stylesheet" href="iq_simulator.css">
+    <script>
+        MathJax = {
+          tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
+          svg: { fontCache: 'global' }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.2/p5.min.js"></script>
+</head>
+<body>
+    <div class="page-wrapper">
+        <div id="sidebar-placeholder" data-root-path="../"></div>
+
+        <div class="main-content">
+            <div class="header">
+                <h1>IQ分布と標準正規分布の比較シミュレーター</h1>
+                <p>〜 縦軸（確率密度）のスケールの違いと標準化の視覚化 〜</p>
+            </div>
+            
+            <div class="back-link">
+                <a href="../index.html">← トップページに戻る</a>
+            </div>
+
+            <div class="container">
+                <section class="description">
+                    <h2>グラフのスケールと標準化について</h2>
+                    <p>元データであるIQの分布 $N(100, 15^2)$ と、標準化した標準正規分布 $N(0, 1^2)$ では、確率密度の高さ（縦軸のスケール）が大きく異なります。</p>
+                    <p>全確率（グラフの全面積）はどちらも必ず <strong>1 (100%)</strong> になるため、横に広く平べったいIQ分布（標準偏差15）に比べ、横幅が狭い標準正規分布（標準偏差1）は、高さを約15倍（$1/15 \approx 0.067$ から $1/\sqrt{2\pi} \approx 0.4$ へ）高くしないとつじつまが合いません。</p>
+                    <p>このシミュレーターでは、それぞれの正しい縦軸・横軸のスケール比を維持したまま、対応する領域が同じ確率（面積）を持っていることを確認できます。</p>
+                </section>
+
+                <section class="simulator-section">
+                    <div class="controls-panel">
+                        <h3>1. 各種設定</h3>
+                        
+                        <div class="setting-group">
+                            <label for="input-total-people" class="main-label">全体の人数 ($N$人)</label>
+                            <input type="number" id="input-total-people" value="1000" min="1" max="1000000" step="100">
+                        </div>
+
+                        <div class="setting-group">
+                            <label class="main-label">ワンクリック範囲選択（$\sigma$ 範囲）</label>
+                            <div class="quick-buttons">
+                                <button type="button" class="sigma-btn" data-type="1sigma">1σ範囲 ($\pm 1\sigma$)</button>
+                                <button type="button" class="sigma-btn" data-type="2sigma">2σ範囲 ($\pm 2\sigma$)</button>
+                                <button type="button" class="sigma-btn" data-type="3sigma">3σ範囲 ($\pm 3\sigma$)</button>
+                            </div>
+                        </div>
+
+                        <div class="setting-group">
+                            <label class="main-label">自由なIQ範囲指定</label>
+                            <div class="input-row">
+                                <div class="input-group-custom">
+                                    <label for="input-x1">下限 $X_1$</label>
+                                    <input type="number" id="input-x1" value="100" step="1">
+                                </div>
+                                <span class="symbol">$\le X \\le$</span>
+                                <div class="input-group-custom">
+                                    <label for="input-x2">上限 $X_2$</label>
+                                    <input type="number" id="input-x2" value="115" step="1">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="result-box">
+                            <h4>計算結果</h4>
+                            <table class="stats-table">
+                                <tbody>
+                                    <tr>
+                                        <td>標準化したZの範囲</td>
+                                        <td id="res-z-range" class="calc-val">0.00 $\le Z \le$ 1.00</td>
+                                    </tr>
+                                    <tr>
+                                        <td>その範囲にいる確率</td>
+                                        <td id="res-prob" class="calc-val emp-val">34.13 %</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="font-weight: bold; color: #d32f2f;"><span id="label-total-people">1000</span>人中の人数</td>
+                                        <td id="res-people" class="calc-val emp-val-large">約 341 人</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="visualization-panel">
+                        <div class="graph-box">
+                            <h4 class="graph-title iq-title">① IQの正規分布 $X \sim N(100, 15^2)$</h4>
+                            <p class="axis-info">※ 横に広く、縦（確率密度）が非常に低い分布（最大値 約0.027）</p>
+                            <div id="canvas-iq" class="canvas-wrapper"></div>
+                        </div>
+                        
+                        <div class="graph-arrow">
+                            <p>標準化 $Z = \frac{X - 100}{15}$</p>
+                            <span>▼</span>
+                        </div>
+
+                        <div class="graph-box">
+                            <h4 class="graph-title std-title">② 標準正規分布 $Z \sim N(0, 1^2)$</h4>
+                            <p class="axis-info">※ 横幅が狭いため、全体の面積を1にするために縦（確率密度）が約15倍高い（最大値 約0.40）</p>
+                            <div id="canvas-std" class="canvas-wrapper"></div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+    <script src="iq_simulator.js"></script>
+    <script src="../sidebar.js"></script>
+</body>
+</html>
