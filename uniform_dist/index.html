@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>一様分布シミュレーター </title>
+    <title>一様分布シミュレーター | 統計学の基礎</title>
     <link rel="stylesheet" href="../common.css">
     <link rel="stylesheet" href="uniform_dist.css">
     <script>
@@ -22,45 +22,92 @@
         <div class="main-content">
             <div class="header">
                 <h1>一様分布シミュレーター</h1>
+                <p>〜 すべての値が「等しい確率密度」で現れる分布 〜</p>
             </div>
-            <div class="container">
-                <h2>連続一様分布 $U(a, b)$</h2>
-                
-                <div class="description" style="background-color: #f8f9fa; padding: 15px; border-left: 5px solid #007bff; margin-bottom: 20px;">
-                    <p>連続一様分布 $U(a, b)$ は、区間 $[a, b]$ において、どの値も同じ確率密度で現れる分布です。</p>
-                    <ul>
-                        <li><strong>確率密度関数 (PDF):</strong> $f(x) = \frac{1}{b-a}$ （$a \le x \le b$ のとき）</li>
-                    </ul>
-                    <p>パラメータ $a$ と $b$ を変更すると、青色で描かれた確率密度関数の幅と高さが変化します。<br>
-                    「1回生成」または「自動生成」を実行すると、選ばれた実数が赤いヒストグラムとして積み上がり、試行回数を重ねるにつれて理論値（青い枠）の形に近づいていくことを確認しましょう。</p>
-                </div>
-                
-                <div class="control-panel">
-                    <div class="input-group">
-                        <label for="param-a">下限 $a$ :</label>
-                        <input type="number" id="param-a" value="0" step="1">
-                    </div>
-                    <div class="input-group">
-                        <label for="param-b">上限 $b$ :</label>
-                        <input type="number" id="param-b" value="10" step="1">
-                    </div>
-                    <button id="generate-btn" class="action-btn large-btn">1回生成</button>
-                    <button id="auto-btn" class="action-btn" style="background-color: #28a745;">自動生成 (オン/オフ)</button>
-                    <button id="reset-btn" class="action-btn">リセット</button>
-                </div>
+            
+            <div class="back-link">
+                <a href="../index.html">← トップページに戻る</a>
+            </div>
 
-                <div class="result-block">
-                    <div class="stats-container">
-                        <p>生成回数: <span id="count-val" class="bold-text">0</span> 回</p>
-                        <p>最新の生成値: <span id="latest-val" class="bold-text">-</span></p>
+            <div class="container">
+                <section class="description">
+                    <h2>連続一様分布（Uniform Distribution）とは？</h2>
+                    <p>ある範囲 $[a, b]$ の間、どの値もまったく同じ「現れやすさ（確率密度）」を持っている連続確率分布です。例えば、完全にランダムに止まるルーレットの角度や、決まった間隔で正確に運行している電車の待ち時間などが、この分布に近くなります。</p>
+                    
+                    <div class="formula-description">
+                        <h3>確率密度関数 $f(x)$</h3>
+                        $$f(x) =  \begin{cases} \dfrac{1}{b - a} & (a \le x \le b) \\ 0 & (	\text{それ以外}) \end{cases}$$
+                        <p>範囲の幅が $(b - a)$ であるため、全体の面積（全確率）が $1$ になるよう、高さは常に $\dfrac{1}{b - a}$ になります。</p>
+                        <ul>
+                            <li><strong>期待値（平均） $\mu=\dfrac{a + b}{2}$ （ちょうど真ん中の値）</li>
+                            <li><strong>分散 $\sigma^2=\dfrac{(b - a)^2}{12}$</li>
+                        </ul>
                     </div>
-                    <div id="canvas-container"></div>
-                </div>
+                </section>
+
+                <section class="simulator-section">
+                    <div class="controls-panel">
+                        <h3>パラメータ設定</h3>
+                        <div class="input-group-custom">
+                            <label for="slider-a">下限 $a$ : <span id="val-a">2.0</span></label>
+                            <input type="range" id="slider-a" min="0" max="8" step="0.5" value="2.0">
+                        </div>
+                        <div class="input-group-custom">
+                            <label for="slider-b">上限 $b$ : <span id="val-b">8.0</span></label>
+                            <input type="range" id="slider-b" min="2" max="10" step="0.5" value="8.0">
+                        </div>
+
+                        <h3 style="margin-top: 20px;">ランダムサンプリング（数の生成）</h3>
+                        <p style="font-size: 0.9em; margin-bottom: 10px; color: #555;">一様分布から実際にランダムに数値を生成し、ヒストグラムとしてプロットします。回数を増やすほど理論上の長方形に近づきます。</p>
+                        <div class="sampling-buttons">
+                            <button id="btn-sample-1" class="sample-btn">1回生成</button>
+                            <button id="btn-sample-100" class="sample-btn">100回生成</button>
+                            <button id="btn-sample-1000" class="sample-btn">1000回生成</button>
+                            <button id="btn-sample-10000" class="sample-btn">10000回生成</button>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <button id="btn-clear" class="clear-btn">サンプルをクリア</button>
+                        </div>
+                    </div>
+
+                    <div class="visualization-panel">
+                        <div id="canvas-container"></div>
+                        
+                        <div class="result-box">
+                            <h4>シミュレーション統計データ</h4>
+                            <table class="stats-table">
+                                <thead>
+                                    <tr>
+                                        <th>指標</th>
+                                        <th>理論値（確率密度関数）</th>
+                                        <th>実験値（生成されたサンプル）</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>総サンプル数</td>
+                                        <td>&infin;</td>
+                                        <td id="stat-count">0</td>
+                                    </tr>
+                                    <tr>
+                                        <td>平均値 (Mean)</td>
+                                        <td id="theory-mean">5.000</td>
+                                        <td id="sample-mean">--</td>
+                                    </tr>
+                                    <tr>
+                                        <td>分散 (Variance)</td>
+                                        <td id="theory-var">3.000</td>
+                                        <td id="sample-var">--</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
             </div>
         </div>
     </div>
-    
-    <script src="../sidebar.js"></script>
     <script src="uniform_dist.js"></script>
+    <script src="../sidebar.js"></script>
 </body>
 </html>

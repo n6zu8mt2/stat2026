@@ -1,175 +1,263 @@
-// uniform_dist.js
+/**
+ * 一様分布シミュレーター
+ */
 
-let a = 0;
-let b = 10;
-let generatedValues = [];
-let isAuto = false;
-
-// グラフ描画領域の余白
-const padding = { top: 40, right: 40, bottom: 60, left: 60 };
-
-function setup() {
-    let canvas = createCanvas(700, 400);
-    canvas.parent('canvas-container');
-
+document.addEventListener('DOMContentLoaded', () => {
     // DOM要素の取得
-    const inputA = document.getElementById('param-a');
-    const inputB = document.getElementById('param-b');
-    const generateBtn = document.getElementById('generate-btn');
-    const autoBtn = document.getElementById('auto-btn');
-    const resetBtn = document.getElementById('reset-btn');
+    const sliderA = document.getElementById('slider-a');
+    const sliderB = document.getElementById('slider-b');
+    const valA = document.getElementById('val-a');
+    const valB = document.getElementById('val-b');
 
-    // パラメータ変更イベント
-    inputA.addEventListener('change', updateParams);
-    inputB.addEventListener('change', updateParams);
+    const btnSample1 = document.getElementById('btn-sample-1');
+    const btnSample100 = document.getElementById('btn-sample-100');
+    const btnSample1000 = document.getElementById('btn-sample-1000');
+    const btnSample10000 = document.getElementById('btn-sample-10000');
+    const btnClear = document.getElementById('btn-clear');
+
+    const statCount = document.getElementById('stat-count');
+    const theoryMean = document.getElementById('theory-mean');
+    const sampleMean = document.getElementById('sample-mean');
+    const theoryVar = document.getElementById('theory-var');
+    const sampleVar = document.getElementById('sample-var');
+
+    let samples = [];
+
+    // パラメータ変更時の処理（a < b を維持）
+    function updateParameters() {
+        let a = parseFloat(sliderA.value);
+        let b = parseFloat(sliderB.value);
+
+        if (a >= b) {
+            if (document.activeElement === sliderA) {
+                b = a + 0.5;
+                if (b > parseFloat(sliderB.max)) {
+                    b = parseFloat(sliderB.max);
+                    a = b - 0.5;
+                    sliderA.value = a;
+                }
+                sliderB.value = b;
+            } else {
+                a = b - 0.5;
+                if (a < parseFloat(sliderA.min)) {
+                    a = parseFloat(sliderA.min);
+                    b = a + 0.5;
+                    sliderB.value = b;
+                }
+                sliderA.value = a;
+            }
+        }
+
+        valA.textContent = a.toFixed(1);
+        valB.textContent = b.toFixed(1);
+
+        // 理論値の更新
+        const tMean = (a + b) / 2;
+        const tVar = Math.pow(b - a, 2) / 12;
+        theoryMean.textContent = tMean.toFixed(3);
+        theoryVar.textContent = tVar.toFixed(3);
+
+        updateSampleStats();
+    }
+
+    // サンプル生成
+    function generateSamples(count) {
+        const a = parseFloat(sliderA.value);
+        const b = parseFloat(sliderB.value);
+        
+        for (let i = 0; i < count; i++) {
+            const val = Math.random() * (b - a) + a;
+            samples.push(val);
+        }
+        updateSampleStats();
+    }
+
+    // 標本統計データの更新
+    function updateSampleStats() {
+        const count = samples.length;
+        statCount.textContent = count;
+
+        if (count === 0) {
+            sampleMean.textContent = '--';
+            sampleVar.textContent = '--';
+            return;
+        }
+
+        let sum = 0;
+        for (let i = 0; i < count; i++) {
+            sum += samples[i];
+        }
+        const sMean = sum / count;
+        sampleMean.textContent = sMean.toFixed(3);
+
+        let sumSqDiff = 0;
+        for (let i = 0; i < count; i++) {
+            sumSqDiff += Math.pow(samples[i] - sMean, 2);
+        }
+        const sVar = sumSqDiff / count;
+        sampleVar.textContent = sVar.toFixed(3);
+    }
+
+    // イベントリスナーの登録
+    sliderA.addEventListener('input', updateParameters);
+    sliderB.addEventListener('input', updateParameters);
+
+    btnSample1.addEventListener('click', () => generateSamples(1));
+    btnSample100.addEventListener('click', () => generateSamples(100));
+    btnSample1000.addEventListener('click', () => generateSamples(1000));
+    btnSample10000.addEventListener('click', () => generateSamples(10000));
     
-    // ボタンのイベント
-    generateBtn.addEventListener('click', generateNumber);
-    
-    autoBtn.addEventListener('click', () => {
-        isAuto = !isAuto;
-        autoBtn.style.backgroundColor = isAuto ? '#dc3545' : '#28a745';
-        autoBtn.textContent = isAuto ? '自動生成 停止' : '自動生成 (オン/オフ)';
+    btnClear.addEventListener('click', () => {
+        samples = [];
+        updateSampleStats();
     });
-    
-    resetBtn.addEventListener('click', resetSimulation);
 
-    // 初期化
-    updateParams();
-}
+    // 初期化実行
+    updateParameters();
 
-// a, bの値が変更されたときの処理
-function updateParams() {
-    let newA = parseFloat(document.getElementById('param-a').value);
-    let newB = parseFloat(document.getElementById('param-b').value);
+    // p5.jsによる描画ロジック
+    const sketch = (p) => {
+        const xMin = -1.0;
+        const xMax = 11.0;
+        const yMin = 0.0;
+        const yMax = 2.2;
 
-    // bがa以下にならないようバリデーション
-    if (newB <= newA) {
-        alert("上限 b は下限 a より大きい必要があります。自動修正します。");
-        newB = newA + 1;
-        document.getElementById('param-b').value = newB;
-    }
-    
-    if (a !== newA || b !== newB) {
-        a = newA;
-        b = newB;
-        resetSimulation(); // パラメータが変わったらリセットする
-    }
-}
+        let padding = { top: 40, right: 30, bottom: 50, left: 60 };
+        let gW, gH;
 
-// 乱数を1つ生成して記録する処理
-function generateNumber() {
-    let val = random(a, b);
-    generatedValues.push(val);
-    document.getElementById('count-val').textContent = generatedValues.length;
-    document.getElementById('latest-val').textContent = val.toFixed(3);
-}
+        p.setup = () => {
+            const container = document.getElementById('canvas-container');
+            const width = container.offsetWidth || 600;
+            const height = 380;
+            p.createCanvas(width, height).parent(container);
+            gW = p.width - padding.left - padding.right;
+            gH = p.height - padding.top - padding.bottom;
+        };
 
-// シミュレーション結果をリセット
-function resetSimulation() {
-    generatedValues = [];
-    document.getElementById('count-val').textContent = "0";
-    document.getElementById('latest-val').textContent = "-";
-}
+        p.draw = () => {
+            p.background(255);
 
-// 毎フレーム呼ばれる描画処理
-function draw() {
-    background(255);
+            const a = parseFloat(sliderA.value);
+            const b = parseFloat(sliderB.value);
 
-    // 自動生成がオンの場合、1フレームに複数回生成してスピードアップ
-    if (isAuto) {
-        for(let i = 0; i < 10; i++) {
-            generateNumber();
-        }
-    }
+            // 1. サンプルヒストグラムの描画
+            if (samples.length > 0) {
+                const binWidth = 0.2; 
+                const numBins = Math.ceil((xMax - xMin) / binWidth);
+                const bins = new Array(numBins).fill(0);
 
-    // --- グラフの軸のスケール計算 ---
-    let marginX = (b - a) * 0.2;
-    if (marginX === 0) marginX = 1;
-    let xMin = a - marginX;
-    let xMax = b + marginX;
+                for (let i = 0; i < samples.length; i++) {
+                    const val = samples[i];
+                    if (val >= xMin && val < xMax) {
+                        const binIdx = Math.floor((val - xMin) / binWidth);
+                        if (binIdx >= 0 && binIdx < numBins) {
+                            bins[binIdx]++;
+                        }
+                    }
+                }
 
-    let pdfValue = 1 / (b - a); // 確率密度 f(x)
-    let yMax = pdfValue * 1.5;  // Y軸の最大値 (余裕を持たせる)
+                p.fill(38, 166, 154, 140); // ターコイズ色の半透明
+                p.noStroke();
+                
+                for (let i = 0; i < numBins; i++) {
+                    const count = bins[i];
+                    if (count === 0) continue;
 
-    let gW = width - padding.left - padding.right;
-    let gH = height - padding.top - padding.bottom;
+                    // 面積が相対度数になるよう、密度に変換
+                    const density = (count / samples.length) / binWidth;
 
-    // --- 軸の描画 ---
-    stroke(0);
-    strokeWeight(1);
-    line(padding.left, padding.top + gH, padding.left + gW, padding.top + gH); // X軸
-    line(padding.left, padding.top, padding.left, padding.top + gH); // Y軸
+                    const bX1 = xMin + i * binWidth;
+                    const bX2 = bX1 + binWidth;
 
-    // 軸ラベル
-    fill(0); noStroke();
-    textSize(14); textAlign(CENTER, TOP);
-    text("値 (x)", padding.left + gW / 2, padding.top + gH + 35);
+                    const px1 = p.map(bX1, xMin, xMax, padding.left, padding.left + gW);
+                    const px2 = p.map(bX2, xMin, xMax, padding.left, padding.left + gW);
+                    const py = p.map(density, yMin, yMax, padding.top + gH, padding.top);
+                    const pyBase = p.map(0, yMin, yMax, padding.top + gH, padding.top);
 
-    textAlign(RIGHT, CENTER);
-    push();
-    translate(padding.left - 45, padding.top + gH / 2);
-    rotate(-HALF_PI);
-    textAlign(CENTER, CENTER);
-    text("確率密度", 0, 0);
-    pop();
+                    p.rect(px1, py, px2 - px1, pyBase - py);
+                }
+            }
 
-    // --- 目盛りの描画 ---
-    drawTickX(a, xMin, xMax, padding, gW, gH, "a=" + a);
-    drawTickX(b, xMin, xMax, padding, gW, gH, "b=" + b);
+            // 2. 理論一様確率密度関数の描画
+            const hTheory = 1 / (b - a);
+            const pa = p.map(a, xMin, xMax, padding.left, padding.left + gW);
+            const pb = p.map(b, xMin, xMax, padding.left, padding.left + gW);
+            const pyTheory = p.map(hTheory, yMin, yMax, padding.top + gH, padding.top);
+            const py0 = p.map(0, yMin, yMax, padding.top + gH, padding.top);
 
-    let yPosPdf = map(pdfValue, 0, yMax, padding.top + gH, padding.top);
-    stroke(0, 50);
-    line(padding.left, yPosPdf, padding.left + gW, yPosPdf); // 確率密度の補助線
-    noStroke(); fill(0); textAlign(RIGHT, CENTER);
-    text(pdfValue.toFixed(3), padding.left - 5, yPosPdf);
-    text("0", padding.left - 5, padding.top + gH);
-
-    // --- 確率密度関数 (PDF) の描画 ---
-    let xPosA = map(a, xMin, xMax, padding.left, padding.left + gW);
-    let xPosB = map(b, xMin, xMax, padding.left, padding.left + gW);
-    
-    fill(0, 123, 255, 30); // 薄い青色
-    stroke(0, 123, 255);
-    strokeWeight(2);
-    rect(xPosA, yPosPdf, xPosB - xPosA, (padding.top + gH) - yPosPdf);
-
-    // --- 生成された値のヒストグラム描画 ---
-    if (generatedValues.length > 0) {
-        let numBins = 30; // ヒストグラムの棒の数
-        let binWidth = (b - a) / numBins;
-        let counts = new Array(numBins).fill(0);
-
-        for (let v of generatedValues) {
-            let index = Math.floor((v - a) / binWidth);
-            if (index >= numBins) index = numBins - 1; 
-            if (index >= 0) counts[index]++;
-        }
-
-        fill(255, 99, 132, 150); // 薄い赤色
-        stroke(255, 99, 132);
-        strokeWeight(1);
-
-        for (let i = 0; i < numBins; i++) {
-            // 面積が1になるように「相対度数密度」を計算
-            let density = (counts[i] / generatedValues.length) / binWidth;
-            let binX1 = a + i * binWidth;
+            p.stroke(0, 121, 107);
+            p.strokeWeight(3);
+            p.noFill();
             
-            let px = map(binX1, xMin, xMax, padding.left, padding.left + gW);
-            let pw = map(binX1 + binWidth, xMin, xMax, padding.left, padding.left + gW) - px;
-            let py = map(density, 0, yMax, padding.top + gH, padding.top);
-            let ph = (padding.top + gH) - py;
+            // 区間外は 0、区間内は 1/(b-a)
+            const pStart = p.map(xMin, xMin, xMax, padding.left, padding.left + gW);
+            const pEnd = p.map(xMax, xMin, xMax, padding.left, padding.left + gW);
+            
+            p.line(pStart, py0, pa, py0);
+            p.line(pa, py0, pa, pyTheory);
+            p.line(pa, pyTheory, pb, pyTheory);
+            p.line(pb, pyTheory, pb, py0);
+            p.line(pb, py0, pEnd, py0);
 
-            rect(px, py, pw, ph);
-        }
-    }
-}
+            // 3. 軸と目盛りの描画
+            p.stroke(80);
+            p.strokeWeight(1);
+            p.line(padding.left, padding.top + gH, padding.left + gW, padding.top + gH); // X軸
+            p.line(padding.left, padding.top, padding.left, padding.top + gH); // Y軸
 
-// X軸の目盛りを描く補助関数
-function drawTickX(val, xMin, xMax, padding, gW, gH, label) {
-    let px = map(val, xMin, xMax, padding.left, padding.left + gW);
-    stroke(0); strokeWeight(1);
-    line(px, padding.top + gH, px, padding.top + gH + 5);
-    noStroke(); fill(0); textAlign(CENTER, TOP);
-    text(label, px, padding.top + gH + 8);
-}
+            // X軸目盛り
+            p.fill(50);
+            p.noStroke();
+            p.textAlign(p.CENTER, p.TOP);
+            p.textSize(11);
+            for (let i = 0; i <= 10; i++) {
+                let x = p.map(i, xMin, xMax, padding.left, padding.left + gW);
+                p.stroke(200);
+                p.line(x, padding.top + gH, x, padding.top + gH + 5);
+                p.noStroke();
+                p.text(i, x, padding.top + gH + 8);
+            }
+            p.text("値 X", padding.left + gW / 2, padding.top + gH + 28);
+
+            // Y軸目盛り
+            p.textAlign(p.RIGHT, p.CENTER);
+            for (let i = 0; i <= yMax; i += 0.5) {
+                let y = p.map(i, yMin, yMax, padding.top + gH, padding.top);
+                p.stroke(200);
+                p.line(padding.left - 5, y, padding.left, y);
+                p.noStroke();
+                p.text(i.toFixed(1), padding.left - 8, y);
+            }
+
+            p.push();
+            p.translate(padding.left - 42, padding.top + gH / 2);
+            p.rotate(-p.HALF_PI);
+            p.textAlign(p.CENTER, p.CENTER);
+            p.text("確率密度 f(x) / 相対度数密度", 0, 0);
+            p.pop();
+
+            // 凡例
+            p.textAlign(p.LEFT, p.TOP);
+            p.textSize(11);
+            p.stroke(0, 121, 107); p.strokeWeight(3);
+            p.line(p.width - 170, padding.top - 15, p.width - 145, padding.top - 15);
+            p.noStroke(); p.fill(50);
+            p.text("理論値 f(x)", p.width - 135, padding.top - 20);
+
+            p.fill(38, 166, 154, 140);
+            p.rect(p.width - 170, padding.top + 3, 25, 12);
+            p.fill(50);
+            p.text("サンプルヒストグラム", p.width - 135, padding.top + 2);
+        };
+
+        p.windowResized = () => {
+            const container = document.getElementById('canvas-container');
+            const width = container.offsetWidth || 600;
+            p.resizeCanvas(width, 380);
+            gW = p.width - padding.left - padding.right;
+            gH = p.height - padding.top - padding.bottom;
+        };
+    };
+
+    new p5(sketch);
+});
