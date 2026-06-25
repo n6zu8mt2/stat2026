@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
         state.prob = p2 - p1;
 
         // UI更新 (範囲部分)
-        resTRange.innerHTML = `${state.t1.toFixed(1)} $\\le T \\le$ ${state.t2.toFixed(1)}`;
+        resTRange.innerHTML = `${state.t1.toFixed(1)} $\\leqq T \\leqq$ ${state.t2.toFixed(1)}`;
         resProb.textContent = `${(state.prob * 100).toFixed(2)} %`;
         
         let people = Math.round(state.prob * state.totalPeople);
