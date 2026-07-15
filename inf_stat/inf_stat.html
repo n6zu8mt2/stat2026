@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>推測統計の確率論的枠組み シミュレーター</title>
+    <script>
+        window.MathJax = {
+          tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
+          svg: { fontCache: 'global' },
+          startup: { typeset: true }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        /* =========================================
+           共通スタイル
+        ========================================= */
+        body {
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+            color: #333;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .page-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #fff;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .main-content {
+            padding: 30px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 { margin: 0; color: #2c3e50; font-size: 1.8em; }
+        .header p { color: #666; margin-top: 5px; }
+
+        /* =========================================
+           説明セクション
+        ========================================= */
+        .description {
+            background-color: #f8f9fa;
+            border-left: 5px solid #2e7d32;
+            padding: 25px;
+            border-radius: 4px;
+            margin-bottom: 30px;
+        }
+        .description h2 { margin-top: 0; color: #1b5e20; font-size: 1.4em; border-bottom: 2px solid #a5d6a7; padding-bottom: 8px; }
+        .description h3 { color: #2e7d32; font-size: 1.1em; margin-top: 20px; margin-bottom: 10px; }
+        .math-box { background: #fff; padding: 15px; border: 1px solid #e0e0e0; border-radius: 6px; margin: 15px 0; }
+        .prop-list { list-style-type: none; padding-left: 0; }
+        .prop-list li { background: #e8f5e9; margin-bottom: 8px; padding: 10px 15px; border-radius: 4px; border-left: 4px solid #4caf50; }
+        
+        .simulator-section { display: flex; flex-wrap: wrap; gap: 20px; }
+        
+        /* =========================================
+           コントロールパネル
+        ========================================= */
+        .controls-panel {
+            flex: 1; min-width: 350px; background: #f1f8e9; padding: 20px;
+            border-radius: 8px; border: 1px solid #aed581; display: flex; flex-direction: column; gap: 20px;
+        }
+        .controls-panel h3 { margin-top: 0; color: #33691e; border-bottom: 2px solid #8bc34a; padding-bottom: 5px; }
+        .setting-group {
+            display: flex; flex-direction: column; gap: 8px; background: #fff; padding: 15px; border-radius: 6px; border: 1px solid #c5e1a5;
+        }
+        .main-label { font-weight: bold; color: #33691e; font-size: 0.95em; }
+        select, input[type="range"], input[type="number"] { padding: 8px; font-size: 1em; border: 1px solid #ccc; border-radius: 4px; width: 100%; box-sizing: border-box; }
+        
+        /* パラメータコンテナ */
+        .param-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+        .param-row label { width: 50%; font-size: 0.9em; font-weight: bold; }
+        .param-row input { width: 35%; }
+        .param-row span { width: 10%; text-align: right; font-weight: bold; color: #d32f2f; }
+
+        /* アクションボタン */
+        .action-btn {
+            background-color: #4caf50; color: white; border: none; padding: 12px; font-size: 1.1em;
+            border-radius: 6px; cursor: pointer; font-weight: bold; transition: background 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .action-btn:hover { background-color: #388e3c; }
+        .action-btn:active { transform: translateY(2px); box-shadow: none; }
+
+        /* =========================================
+           グラフ・結果パネル
+        ========================================= */
+        .visualization-panel { flex: 2; min-width: 450px; display: flex; flex-direction: column; gap: 15px; }
+        
+        /* ログエリア */
+        .log-box {
+            background: #fff; border: 1px solid #ccc; border-radius: 8px; padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05); font-family: monospace; font-size: 0.95em;
+        }
+        .log-box h4 { margin-top: 0; color: #2c3e50; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 10px; }
+        .log-content { max-height: 250px; overflow-y: auto; background: #fafafa; padding: 10px; border-radius: 4px; border: 1px inset #eee; }
+        .log-entry { margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px dashed #ddd; }
+        .log-highlight { color: #d32f2f; font-weight: bold; }
+        .log-omega { color: #1976d2; font-weight: bold; }
+
+        .graph-box { background: #fff; border: 1px solid #ccc; border-radius: 8px; padding: 25px 15px 15px 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); position: relative; }
+        .graph-title { margin-top: 0; margin-bottom: 5px; padding-left: 8px; border-left: 4px solid #4caf50; color: #2e7d32; }
+        .canvas-wrapper { width: 100%; height: 350px; }
+
+        @media (max-width: 768px) { .simulator-section { flex-direction: column; } .visualization-panel { min-width: 100%; } }
+    </style>
+</head>
+<body>
+    <div class="page-wrapper">
+        <div class="main-content">
+            <div class="header">
+                <h1>推測統計の確率論的枠組み シミュレーター</h1>
+                <p>〜 「全国の男子大学生の身長」を例にした、確率空間と実現値の理解 〜</p>
+            </div>
+
+            <div class="container">
+                <section class="description">
+                    <h2>「手元のデータ」はどのようにして生まれるのか？</h2>
+                    <p>
+                        推測統計では、私たちが観測した手元のデータは<b>「あらかじめ決まっていた数値」ではなく、「ある確率的なルールによって偶然生成された数値」</b>であると考えます。
+                        ここでは具体例として、<b>「全国の男子大学生から $n$ 人を無作為に選んで身長を測る」</b>というストーリーで考えてみましょう。<br>
+                    </p>
+                    
+                    <h3>1. 標本空間 $\Omega$ と事象 $\omega$</h3>
+                    <ul class="prop-list">
+                        <li><strong>標本空間 $\Omega$:</strong> $n$ 人抽出したときの身長の組み合わせ全パターンの集合です。今回は身長（実数）の測定結果の組として、次のように定義できます。<br>
+                        $$\Omega = \{ \omega = (a_1, a_2,\dots, a_n) \mid a_1, \dots, a_n \text{ は実数} \}$$</li>
+                        <li><strong>事象（標本点） $\omega$:</strong> 実際に $n$ 人を選び出した「1回の結果」です。抽出ボタンを押した瞬間に、具体的な実数の組 $\omega = (171.2, 168.5, 175.1, \dots)$ が1つだけ確定します。これは$1$番目の学生の身長が$171.2$cmであり、2番目の学生が168.5cm、3番目の学生が175.1cm...であることを意味します。</li>
+                    </ul>
+
+                    <h3>2. 確率変数 $X_i$ と 実現値 $X_i(\omega)$</h3>
+                    <ul class="prop-list">
+                        <li><strong>確率変数 $X_i$: </strong> 
+                        確率変数$X_i$は$i$ 番目に選ばれた学生の身長を表す確率変数です。これは、標本空間 $\Omega$ を定義域とする関数です。「確定した $n$ 人の組 $\omega = (a_1, a_2, \dots, a_n) \in \Omega$ の中から、$i$ 番目の学生の身長を取り出す」ので、次のように表されます。<br>
+                        $$X_i(\omega) = X_i(a_1, a_2, \dots, a_n) = a_i$$</li>
+                        <li><strong>実現値 $x_i$（データ）:</strong> <br>
+                        事象 $\omega$ が発生し、それを関数 $X_i$ に入力した結果として吐き出される具体的な数値のことです。私たちが普段「データ」と呼んでいるものは、すでに $\omega$ が固定された後の $X_i(\omega)$ のことです。</li>
+                    </ul>
+                    <h3>3. 母集団分布</h3>
+                    <p>背後にある「全国の男子大学生の身長分布」は、母平均 $\mu$、母標準偏差 $\sigma$ の正規分布$N(\mu, \sigma^2) $に従うと仮定します。(標本空間 $\Omega$ に確率 $P$ を設定したと言い換えることも出来ます。)この $N(\mu, \sigma^2)$ を母集団分布とよびます。<strong>母集団分布や母平均$\mu$・母標準偏差$\sigma$は本来はわからないものです。</strong> もしも母集団分布が分かっていたら、データを使って推測する必要がありません。なお、シミュレーションを行う都合上、シミュレータでは$N(\mu, \sigma^2)= N(170, 6^2)$としています。</p>
+                    <h3>4. 推測統計の目的</h3>
+                    <p>シミュレータの都合上、3.母集団分布が$N(170, 6^2)$であると仮定しましたが、本来はこの。<strong>母集団分布はわかりません。</strong>推測統計の目的は、<strong>母集団の未知のパラメータ（例：母平均 $\mu$、母標準偏差 $\sigma$）を推定すること</strong>です。つまり、標本から得られたデータ$x_1, x_2, \dots, x_n$を用いて、母集団の分布やパラメータについての情報を得ることです。</p>
+                </section>
+
+                <section class="simulator-section">
+                    <div class="controls-panel">
+                        <h3>設定・操作パネル</h3>
+                        
+                        <div class="setting-group">
+                            <label class="main-label">1. 母集団分布（全国男子大学生の身長）</label>
+                            <p style="font-size:0.85em; color:#666; margin:0 0 5px 0;">背後にある確率法則を設定します。</p>
+                            <div class="param-row">
+                                <label for="n_mu">身長の母平均 $\mu$</label>
+                                <input type="range" id="n_mu" min="150" max="190" step="1" value="170">
+                                <span id="n_mu-val">170</span>
+                            </div>
+                            <div class="param-row">
+                                <label for="n_sig">身長の母標準偏差 $\sigma$</label>
+                                <input type="range" id="n_sig" min="1" max="15" step="1" value="6">
+                                <span id="n_sig-val">6</span>
+                            </div>
+                        </div>
+
+                        <div class="setting-group">
+                            <label class="main-label">2. 抽出する人数（サンプルサイズ $n$）</label>
+                            <p style="font-size:0.85em; color:#666; margin:0 0 5px 0;">関数 $X_1, X_2, \dots, X_n$ をいくつ用意するかを決めます。</p>
+                            <input type="range" id="input-n" min="1" max="10" step="1" value="5">
+                            <div style="text-align: right; font-weight: bold; color: #33691e;">$n = $ <span id="label-n">5</span> 人</div>
+                        </div>
+
+                        <button id="btn-draw" class="action-btn">事象 $\omega$ を発生させる (学生を無作為抽出)</button>
+                        <p style="font-size:0.8em; color:#555; text-align:center; margin-top:5px;">クリックすると、$\Omega$ から1つの $\omega = (a_1, \dots, a_n)$ が確定します。</p>
+                    </div>
+
+                    <div class="visualization-panel">
+                        <div class="log-box">
+                            <h4>観測ログ：$\omega$ の決定と $X_i(\omega)$ の評価</h4>
+                            <div class="log-content" id="log-content">
+                                <span style="color:#999;">ここに事象 $\omega$ の発生と、各学生の身長データの抽出結果が表示されます...</span>
+                            </div>
+                        </div>
+
+                        <div class="graph-box">
+                            <h4 class="graph-title">母集団分布と 実現値 $X_i(\omega)$ のプロット</h4>
+                            <p style="font-size: 0.85em; color: #666; margin: 0 0 10px 8px;">
+                                青い曲線は背後にある「全国男子大学生の身長分布」です。赤い点は、発生した事象 $\omega$ によって確定した具体的な身長 $a_i$ の位置を示しています。
+                            </p>
+                            <div class="canvas-wrapper">
+                                <canvas id="chart-distribution"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const inputN = document.getElementById('input-n');
+            const labelN = document.getElementById('label-n');
+            const inputMu = document.getElementById('n_mu');
+            const inputSig = document.getElementById('n_sig');
+            const valMu = document.getElementById('n_mu-val');
+            const valSig = document.getElementById('n_sig-val');
+            const btnDraw = document.getElementById('btn-draw');
+            const logContent = document.getElementById('log-content');
+
+            let chartInstance = null;
+            let omegaCounter = 1;
+
+            // Box-Muller変換で正規分布乱数を生成
+            function generateNormal(mu, sigma) {
+                let u1 = Math.random(), u2 = Math.random();
+                let z = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+                return z * sigma + mu;
+            }
+
+            // 正規分布の確率密度関数 (PDF)
+            function normalPDF(x, mu, sigma) {
+                const coef = 1 / (sigma * Math.sqrt(2 * Math.PI));
+                const exponent = -Math.pow(x - mu, 2) / (2 * Math.pow(sigma, 2));
+                return coef * Math.exp(exponent);
+            }
+
+            // UI更新
+            function updateParams() {
+                valMu.textContent = inputMu.value;
+                valSig.textContent = inputSig.value;
+                labelN.textContent = inputN.value;
+                drawEmptyChart();
+            }
+
+            inputMu.addEventListener('input', updateParams);
+            inputSig.addEventListener('input', updateParams);
+            inputN.addEventListener('input', updateParams);
+
+            // グラフ描画関数
+            function drawChart(realizedPoints = []) {
+                const mu = parseFloat(inputMu.value);
+                const sig = parseFloat(inputSig.value);
+                const ctx = document.getElementById('chart-distribution').getContext('2d');
+
+                if (chartInstance) chartInstance.destroy();
+
+                const xMin = mu - 4 * sig;
+                const xMax = mu + 4 * sig;
+                const step = (xMax - xMin) / 100;
+
+                let lineData = [];
+                for (let x = xMin; x <= xMax; x += step) {
+                    lineData.push({ x: x, y: normalPDF(x, mu, sig) });
+                }
+
+                let scatterData = realizedPoints.map(val => ({
+                    x: val, 
+                    y: 0
+                }));
+
+                chartInstance = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        datasets: [
+                            {
+                                label: '母集団の分布 (確率密度関数)',
+                                data: lineData,
+                                borderColor: '#1976d2',
+                                backgroundColor: 'rgba(25, 118, 210, 0.1)',
+                                borderWidth: 2,
+                                fill: true,
+                                pointRadius: 0,
+                                tension: 0.4
+                            },
+                            {
+                                type: 'scatter',
+                                label: '抽出された学生の身長 X_i(ω)',
+                                data: scatterData,
+                                backgroundColor: '#d32f2f',
+                                borderColor: '#fff',
+                                borderWidth: 1,
+                                pointRadius: 6,
+                                pointHoverRadius: 8,
+                                z: 10
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                type: 'linear',
+                                min: xMin,
+                                max: xMax,
+                                title: { display: true, text: '身長 (cm)' }
+                            },
+                            y: {
+                                min: -normalPDF(mu, mu, sig) * 0.05,
+                                title: { display: true, text: '確率密度' }
+                            }
+                        },
+                        plugins: {
+                            legend: { position: 'top' },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        if (context.datasetIndex === 1) {
+                                            return `学生の身長: ${context.parsed.x.toFixed(1)} cm`;
+                                        }
+                                        return `身長: ${context.parsed.x.toFixed(1)}cm, 密度: ${context.parsed.y.toFixed(4)}`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            function drawEmptyChart() {
+                drawChart([]);
+            }
+
+            // シミュレーション実行
+            btnDraw.addEventListener('click', () => {
+                const mu = parseFloat(inputMu.value);
+                const sig = parseFloat(inputSig.value);
+                const n = parseInt(inputN.value);
+
+                // 1. ωの発生 (データ抽出)
+                let realizedValues = [];
+                for (let i = 0; i < n; i++) {
+                    realizedValues.push(generateNormal(mu, sig));
+                }
+
+                // ω の文字列表現を作成 (a_1, a_2, ..., a_n)
+                const omegaString = realizedValues.map(v => v.toFixed(1)).join(', ');
+
+                // 2. ログの追加
+                const logEntry = document.createElement('div');
+                logEntry.className = 'log-entry';
+                
+                let logHTML = `
+                    <div><span class="log-omega">[Event ${omegaCounter}]</span> 無作為抽出が行われ、標本空間 $\\Omega$ から事象 $\\omega_{${omegaCounter}}$ が確定しました。</div>
+                    <div style="margin: 8px 0; background: #e3f2fd; padding: 5px; border-radius: 4px;">
+                        $\\omega_{${omegaCounter}} = (${omegaString})$
+                    </div>
+                    <div>関数 $X_i$ によって各学生の身長 $a_i$ が取り出されます：</div>
+                `;
+                
+                realizedValues.forEach((val, i) => {
+                    logHTML += `&nbsp;&nbsp; $X_{${i+1}}(\\omega_{${omegaCounter}}) = a_{${i+1}} = $ <span class="log-highlight">${val.toFixed(1)}</span> cm<br>`;
+                });
+                
+                logEntry.innerHTML = logHTML;
+                
+                if (logContent.innerHTML.includes('ここに事象')) {
+                    logContent.innerHTML = '';
+                }
+                logContent.insertBefore(logEntry, logContent.firstChild);
+
+                if (window.MathJax) {
+                    MathJax.typesetPromise([logEntry]).catch((err) => console.log(err));
+                }
+
+                omegaCounter++;
+                drawChart(realizedValues);
+            });
+
+            updateParams();
+        });
+    </script>
+</body>
+</html>

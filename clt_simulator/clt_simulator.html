@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中心極限定理（CLT）シミュレーター</title>
+    <script>
+        window.MathJax = {
+          tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
+          svg: { fontCache: 'global' },
+          startup: { typeset: true }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        /* =========================================
+           共通スタイル
+        ========================================= */
+        body {
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+            color: #333;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .page-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #fff;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .main-content {
+            padding: 30px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 { margin: 0; color: #2c3e50; }
+        .header p { color: #666; margin-top: 5px; }
+
+        /* =========================================
+           説明セクション
+        ========================================= */
+        .description {
+            background-color: #f8f9fa;
+            border-left: 5px solid #673ab7;
+            padding: 25px;
+            border-radius: 4px;
+            margin-bottom: 30px;
+        }
+        .description h2 { margin-top: 0; color: #512da8; font-size: 1.4em; border-bottom: 2px solid #d1c4e9; padding-bottom: 8px; }
+        .description h3 { color: #4527a0; font-size: 1.1em; margin-top: 20px; margin-bottom: 10px; }
+        .math-box { background: #fff; padding: 15px; border: 1px solid #e0e0e0; border-radius: 6px; margin: 15px 0; }
+        .prop-list { list-style-type: none; padding-left: 0; }
+        .prop-list li { background: #ede7f6; margin-bottom: 8px; padding: 10px 15px; border-radius: 4px; border-left: 4px solid #7e57c2; }
+        
+        .simulator-section { display: flex; flex-wrap: wrap; gap: 20px; }
+        
+        /* =========================================
+           コントロールパネル
+        ========================================= */
+        .controls-panel {
+            flex: 1; min-width: 350px; background: #f3e5f5; padding: 20px;
+            border-radius: 8px; border: 1px solid #ce93d8; display: flex; flex-direction: column; gap: 20px;
+        }
+        .controls-panel h3 { margin-top: 0; color: #4a148c; border-bottom: 2px solid #ab47bc; padding-bottom: 5px; }
+        .setting-group {
+            display: flex; flex-direction: column; gap: 8px; background: #fff; padding: 15px; border-radius: 6px; border: 1px solid #e1bee7;
+        }
+        .main-label { font-weight: bold; color: #4a148c; font-size: 0.95em; }
+        select, input[type="range"], input[type="number"] { padding: 8px; font-size: 1em; border: 1px solid #ccc; border-radius: 4px; width: 100%; box-sizing: border-box; }
+        
+        /* N選択ボタン */
+        .quick-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+        .n-btn {
+            flex: 1; padding: 8px 4px; font-size: 0.9em; background-color: #fff; border: 1px solid #ab47bc; color: #4a148c;
+            border-radius: 4px; cursor: pointer; transition: all 0.2s; font-weight: bold; text-align: center;
+        }
+        .n-btn:hover { background-color: #e1bee7; }
+        .n-btn.active { background-color: #8e24aa; color: #fff; border-color: #8e24aa; }
+
+        /* パラメータコンテナ */
+        .param-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+        .param-row label { width: 40%; font-size: 0.9em; font-weight: bold; }
+        .param-row input { width: 40%; }
+        .param-row span { width: 15%; text-align: right; font-weight: bold; color: #d32f2f; }
+
+        /* 理論値ボックス */
+        .formula-box { background: #fff; border: 1px solid #bdc3c7; border-radius: 8px; padding: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); font-size: 0.9em; overflow-x: auto; }
+        .formula-box h4 { margin-top: 0; color: #2c3e50; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px;}
+        .formula-box table { width: 100%; border-collapse: collapse; }
+        .formula-box td { padding: 5px; border-bottom: 1px dashed #eee; }
+        .formula-box .val { font-weight: bold; color: #d32f2f; text-align: right; }
+
+        /* トグルスイッチ用 */
+        .toggle-label { display: flex; align-items: center; font-size: 0.9em; font-weight: bold; cursor: pointer; color: #2c3e50; }
+        .toggle-label input { margin-right: 8px; transform: scale(1.2); }
+        .toggle-desc { font-size: 0.8em; color: #666; margin-top: 4px; line-height: 1.4; }
+
+        /* =========================================
+           グラフパネル
+        ========================================= */
+        .visualization-panel { flex: 2; min-width: 450px; display: flex; flex-direction: column; gap: 15px; }
+        .graph-box { background: #fff; border: 1px solid #ccc; border-radius: 8px; padding: 25px 15px 15px 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); position: relative; }
+        .graph-title { margin-top: 0; margin-bottom: 5px; padding-left: 8px; }
+        .pop-title { border-left: 4px solid #ab47bc; color: #4a148c; }
+        .smp-title { border-left: 4px solid #1e88e5; color: #0d47a1; }
+        .axis-info { font-size: 0.85em; color: #666; margin: 0 0 10px 8px; }
+        .canvas-wrapper { width: 100%; height: 280px; }
+        
+        .graph-arrow { text-align: center; color: #666; font-weight: bold; background: #e8f4f8; border-radius: 8px; padding: 10px; border: 1px dashed #4fc3f7; }
+        .graph-arrow p { margin: 0; font-size: 0.95em; color: #0277bd; }
+        .graph-arrow span { font-size: 1.5em; color: #0277bd; display: block; margin-top: 5px; }
+
+        .legend-indicator { position: absolute; top: 15px; right: 15px; font-size: 0.8em; background: rgba(255,255,255,0.9); padding: 5px; border: 1px solid #ddd; border-radius: 4px; z-index: 10; }
+
+        @media (max-width: 768px) { .simulator-section { flex-direction: column; } .visualization-panel { min-width: 100%; } }
+    </style>
+</head>
+<body>
+    <div class="page-wrapper">
+        <div class="main-content">
+            <div class="header">
+                <h1>中心極限定理（CLT）シミュレーター</h1>
+                <p>〜 標本平均の分布収束とスケールコントロール 〜</p>
+            </div>
+
+            <div class="container">
+                <section class="description">
+                    <h2>中心極限定理の理論と性質</h2>
+                    
+                    <h3>1. 標本平均 $\overline{X}_n$ の定義と記号の意味</h3>
+                    <p>平均 $\mu$、分散 $\sigma^2$ を持つ母集団から、無作為に抽出された $n$ 個の独立な確率変数を $X_1, X_2, \cdots, X_n$ とします。<br>
+                    このとき、それらの平均値（標本平均） $\overline{X}_n$ は以下の式で定義されます。</p>
+                    <div class="math-box">
+                        $$ \overline{X}_n = \dfrac{X_1 + X_2 + \cdots + X_n}{n} $$
+                        <ul style="margin: 10px 0 0 0; padding-left: 20px; font-size: 0.9em;">
+                            <li>$X_i$：抽出された $i$ 番目のデータ。</li>
+                            <li>$n$：サンプルサイズ（一度に抽出するデータの個数）。</li>
+                            <li>$\overline{X}_n$：抽出した $n$ 個のデータの平均値。</li>
+                        </ul>
+                    </div>
+
+                    <h3>2. 標本平均の性質</h3>
+                    <p>母集団から抽出したデータを平均する操作により、標本平均 $\overline{X}_n$ 自身もひとつの確率分布を持ちます。その分布には以下の強力な性質があります。</p>
+                    <ul class="prop-list">
+                        <li><strong>① 期待値（中心の位置）: $E[\overline{X}_n] = \mu$</strong><br>標本平均の期待値は、元の母集団の平均 $\mu$ と完全に一致します（不偏性）。</li>
+                        <li><strong>② 分散（ばらつき）: $V[\overline{X}_n] = \frac{\sigma^2}{n}$</strong><br>データを足し合わせて平均することで、極端な値が相殺され、データのばらつきが元の $\frac{1}{n}$ に縮小します。</li>
+                        <li><strong>③ 標準偏差（標準誤差）: $SD[\overline{X}_n] = \frac{\sigma}{\sqrt{n}}$</strong><br>分散の平方根をとったものです。$n$ を増やすほど、ばらつきが $\frac{1}{\sqrt{n}}$ の速度で小さくなっていきます。</li>
+                    </ul>
+
+                    <h3>3. 中心極限定理（Central Limit Theorem）の主張</h3>
+                    <p>中心極限定理は統計学における最も重要な定理の一つです。その主張は、<strong>「元の母集団がどんなに偏った奇妙な分布（一様分布や幾何分布など）であっても、サンプルサイズ $n$ が十分に大きければ、標本平均 $\overline{X}_n$ の分布は近似的に正規分布 $N(\mu, \frac{\sigma^2}{n})$ に従う」</strong>というものです。</p>
+                    <p>これを厳密な数式（標準化）で表すと、以下のようになります。</p>
+                    <div class="math-box">
+                        $$ \lim_{n \to \infty} P\left( \frac{\overline{X}_n - \mu}{\sigma / \sqrt{n}} \le z \right) = \int_{-\infty}^{z} \frac{1}{\sqrt{2\pi}} e^{-t^2/2} dt $$
+                    </div>
+                    <p>このシミュレーターでは、$n$ を大きくしたときに<strong>「分布の幅が $\frac{1}{\sqrt{n}}$ に縮小していく様子（X軸スケール固定）」</strong>と、<strong>「形そのものが釣鐘型（正規分布）に近づいていく様子（自動ズーム）」</strong>の両方を確認できます。</p>
+                </section>
+
+                <section class="simulator-section">
+                    <div class="controls-panel">
+                        <h3>設定パネル</h3>
+                        
+                        <div class="setting-group">
+                            <label for="select-dist" class="main-label">1. 母集団の確率分布</label>
+                            <select id="select-dist">
+                                <option value="uniform">一様分布 (連続・平坦)</option>
+                                <option value="binomial">二項分布 (離散・コイン投げ)</option>
+                                <option value="geometric">幾何分布 (離散・極端な右偏り)</option>
+                                <option value="normal">正規分布 (連続・最初から釣鐘型)</option>
+                            </select>
+                        </div>
+
+                        <div class="setting-group" id="param-container">
+                            <label class="main-label">2. 分布のパラメータ</label>
+                            <div id="param-inputs"></div>
+                        </div>
+
+                        <div class="setting-group">
+                            <label class="main-label">3. サンプルサイズ ($n$)</label>
+                            <div class="quick-buttons">
+                                <button type="button" class="n-btn active" data-n="1">n = 1</button>
+                                <button type="button" class="n-btn" data-n="2">n = 2</button>
+                                <button type="button" class="n-btn" data-n="10">n = 10</button>
+                                <button type="button" class="n-btn" data-n="50">n = 50</button>
+                            </div>
+                            <input type="range" id="input-n" min="1" max="100" step="1" value="1" style="margin-top: 10px;">
+                            <div style="text-align: right; font-weight: bold; color: #8e24aa;">現在: <span id="label-n">1</span></div>
+                        </div>
+
+                        <div class="setting-group">
+                            <label class="main-label">4. グラフの表示設定</label>
+                            <label class="toggle-label">
+                                <input type="checkbox" id="check-fixed-scale" checked>
+                                X軸のスケール（表示範囲）を固定する
+                            </label>
+                            <div class="toggle-desc">
+                                <strong>【ON (固定)】:</strong> 上下のグラフの目盛りが一致します。$n$ を増やすと分散が小さくなり、グラフが鋭い針のように収束していく様子がわかります。<br>
+                                <strong>【OFF (自動)】:</strong> 下のグラフが自動でズームされます。分散が縮小しても幅が広く描画されるため、正規分布の「釣鐘型」の形を観察しやすくなります。
+                            </div>
+                        </div>
+
+                        <div class="formula-box" id="formula-display"></div>
+                    </div>
+
+                    <div class="visualization-panel">
+                        <div class="graph-box">
+                            <div class="legend-indicator">
+                                <span style="color:red; font-weight:bold;">—</span> $\mu$<br>
+                                <span style="color:blue; font-weight:bold;">- -</span> $\mu \pm \sigma$
+                            </div>
+                            <h4 class="graph-title pop-title">① 母集団の分布 $X$（本来の形）</h4>
+                            <div class="canvas-wrapper">
+                                <canvas id="chart-population"></canvas>
+                            </div>
+                        </div>
+                        
+                        <div class="graph-arrow">
+                            <p>無作為に抽出した <strong style="font-size: 1.2em;"><span id="arrow-n">1</span> 個</strong> の平均 $\overline{X}_n$ を取る（5,000回反復）</p>
+                            <span>▼</span>
+                        </div>
+
+                        <div class="graph-box">
+                            <div class="legend-indicator">
+                                <span style="color:red; font-weight:bold;">—</span> $\mu$<br>
+                                <span style="color:blue; font-weight:bold;">- -</span> $\mu \pm \sigma_{\overline{X}}$
+                            </div>
+                            <h4 class="graph-title smp-title">② 標本平均 $\overline{X}_n$ の分布</h4>
+                            <p class="axis-info" id="axis-info-smp">※ X軸スケール固定中</p>
+                            <div class="canvas-wrapper">
+                                <canvas id="chart-sample-mean"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- カスタムプラグイン（LinearスケールのX軸から正確な座標を取得して縦線を引く） ---
+        const verticalLinePlugin = {
+            id: 'verticalLines',
+            afterDatasetsDraw(chart, args, options) {
+                const { ctx, chartArea: { top, bottom, left, right }, scales: { x } } = chart;
+                if (!options.lines) return;
+
+                options.lines.forEach(line => {
+                    const xPos = x.getPixelForValue(line.value);
+                    if (xPos >= left && xPos <= right) {
+                        ctx.save();
+                        ctx.beginPath();
+                        ctx.moveTo(xPos, top);
+                        ctx.lineTo(xPos, bottom);
+                        ctx.lineWidth = line.width || 2;
+                        ctx.strokeStyle = line.color || 'red';
+                        if (line.dashed) ctx.setLineDash(line.dashed);
+                        ctx.stroke();
+                        ctx.restore();
+                    }
+                });
+            }
+        };
+        Chart.register(verticalLinePlugin);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const selectDist = document.getElementById('select-dist');
+            const inputN = document.getElementById('input-n');
+            const labelN = document.getElementById('label-n');
+            const arrowN = document.getElementById('arrow-n');
+            const checkFixed = document.getElementById('check-fixed-scale');
+            const axisInfoSmp = document.getElementById('axis-info-smp');
+            const nButtons = document.querySelectorAll('.n-btn');
+            const paramInputsDiv = document.getElementById('param-inputs');
+            const formulaDisplayDiv = document.getElementById('formula-display');
+
+            let popChart = null;
+            let smpChart = null;
+            const TRIALS = 5000;
+
+            const distConfig = {
+                uniform: {
+                    name: "一様分布 $U(a, b)$",
+                    params: [
+                        { id: 'u_a', label: '下限 $a$', min: -50, max: 50, step: 1, val: 0 },
+                        { id: 'u_b', label: '上限 $b$', min: 0, max: 100, step: 1, val: 100 }
+                    ],
+                    stats: (p) => ({
+                        mu: (p.u_a + p.u_b) / 2, var: Math.pow(p.u_b - p.u_a, 2) / 12,
+                        muStr: "\\frac{a+b}{2}", varStr: "\\frac{(b-a)^2}{12}"
+                    }),
+                    gen: (p) => p.u_a + Math.random() * (p.u_b - p.u_a),
+                    discrete: false
+                },
+                binomial: {
+                    name: "二項分布 $B(N, p)$",
+                    params: [
+                        { id: 'b_N', label: '試行回数 $N$', min: 1, max: 100, step: 1, val: 20 },
+                        { id: 'b_p', label: '成功確率 $p$', min: 0.05, max: 0.95, step: 0.05, val: 0.5 }
+                    ],
+                    stats: (p) => ({
+                        mu: p.b_N * p.b_p, var: p.b_N * p.b_p * (1 - p.b_p),
+                        muStr: "N p", varStr: "N p (1-p)"
+                    }),
+                    gen: (p) => {
+                        let suc = 0;
+                        for(let i=0; i<p.b_N; i++) if(Math.random() < p.b_p) suc++;
+                        return suc;
+                    },
+                    discrete: true
+                },
+                geometric: {
+                    name: "幾何分布 $Geo(p)$",
+                    params: [
+                        { id: 'g_p', label: '成功確率 $p$', min: 0.05, max: 0.95, step: 0.05, val: 0.1 }
+                    ],
+                    stats: (p) => ({
+                        mu: 1 / p.g_p, var: (1 - p.g_p) / Math.pow(p.g_p, 2),
+                        muStr: "\\frac{1}{p}", varStr: "\\frac{1-p}{p^2}"
+                    }),
+                    gen: (p) => Math.floor(Math.log(Math.random()) / Math.log(1 - p.g_p)) + 1,
+                    discrete: true
+                },
+                normal: {
+                    name: "正規分布 $N(\\mu, \\sigma^2)$",
+                    params: [
+                        { id: 'n_mu', label: '平均 $\\mu$', min: -50, max: 150, step: 1, val: 50 },
+                        { id: 'n_sig', label: '標準偏差 $\\sigma$', min: 1, max: 50, step: 1, val: 15 }
+                    ],
+                    stats: (p) => ({
+                        mu: p.n_mu, var: Math.pow(p.n_sig, 2),
+                        muStr: "\\mu", varStr: "\\sigma^2"
+                    }),
+                    gen: (p) => {
+                        let u1 = Math.random(), u2 = Math.random();
+                        let z = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+                        return z * p.n_sig + p.n_mu;
+                    },
+                    discrete: false
+                }
+            };
+
+            function getCurrentParams(distKey) {
+                let pVals = {};
+                distConfig[distKey].params.forEach(p => {
+                    const el = document.getElementById(p.id);
+                    pVals[p.id] = el ? parseFloat(el.value) : p.val;
+                });
+                return pVals;
+            }
+
+            function buildParamUI() {
+                const distKey = selectDist.value;
+                const conf = distConfig[distKey];
+                paramInputsDiv.innerHTML = '';
+                
+                conf.params.forEach(p => {
+                    const row = document.createElement('div');
+                    row.className = 'param-row';
+                    row.innerHTML = `
+                        <label for="${p.id}">${p.label}</label>
+                        <input type="range" id="${p.id}" min="${p.min}" max="${p.max}" step="${p.step}" value="${p.val}">
+                        <span id="${p.id}-val">${p.val}</span>
+                    `;
+                    paramInputsDiv.appendChild(row);
+
+                    const inputEl = document.getElementById(p.id);
+                    const valEl = document.getElementById(`${p.id}-val`);
+                    inputEl.addEventListener('input', (e) => {
+                        if (distKey === 'uniform') {
+                            if (p.id === 'u_a' && parseFloat(e.target.value) >= parseFloat(document.getElementById('u_b').value)) e.target.value = document.getElementById('u_b').value - 1;
+                            if (p.id === 'u_b' && parseFloat(e.target.value) <= parseFloat(document.getElementById('u_a').value)) e.target.value = parseFloat(document.getElementById('u_a').value) + 1;
+                        }
+                        valEl.textContent = e.target.value;
+                        distConfig[distKey].params.find(param => param.id === p.id).val = parseFloat(e.target.value);
+                        runSimulation();
+                    });
+                });
+            }
+
+            function updateFormulaUI(conf, stats, n) {
+                const std = Math.sqrt(stats.var);
+                const smpVar = stats.var / n;
+                const smpStd = Math.sqrt(smpVar);
+
+                formulaDisplayDiv.innerHTML = `
+                    <h4>【理論値】 ${conf.name}</h4>
+                    <table>
+                        <tr><td>母集団の期待値 $\\mu = ${stats.muStr}$</td><td class="val">${stats.mu.toFixed(2)}</td></tr>
+                        <tr><td>母集団の分散 $\\sigma^2 = ${stats.varStr}$</td><td class="val">${stats.var.toFixed(2)}</td></tr>
+                        <tr><td>母集団の標準偏差 $\\sigma$</td><td class="val">${std.toFixed(2)}</td></tr>
+                        <tr style="background:#e8eaf6;">
+                            <td>標本平均の標準偏差 $\\sigma_{\\overline{X}} = \\frac{\\sigma}{\\sqrt{n}}$</td>
+                            <td class="val">${smpStd.toFixed(2)}</td>
+                        </tr>
+                    </table>
+                `;
+                if (window.MathJax) MathJax.typesetPromise([formulaDisplayDiv]).catch((err) => console.log(err));
+            }
+
+            // --- データのビン分割（X軸 Linearスケール対応） ---
+            function createLinearBins(data, discrete, binsCount) {
+                let dMin = Math.min(...data);
+                let dMax = Math.max(...data);
+                if (dMin === dMax) { dMax += 1; dMin -= 1; }
+
+                if (discrete) {
+                    dMin = Math.floor(dMin) - 0.5;
+                    dMax = Math.ceil(dMax) + 0.5;
+                    binsCount = Math.round(dMax - dMin);
+                }
+
+                let step = (dMax - dMin) / binsCount;
+                let counts = new Array(binsCount).fill(0);
+
+                for (let val of data) {
+                    let idx = Math.floor((val - dMin) / step);
+                    if (idx >= binsCount) idx = binsCount - 1;
+                    if (idx < 0) idx = 0;
+                    counts[idx]++;
+                }
+
+                let binnedData = [];
+                const total = data.length;
+                for (let i = 0; i < binsCount; i++) {
+                    let center = dMin + (i + 0.5) * step;
+                    binnedData.push({ x: center, y: counts[i] / total });
+                }
+
+                return { dataPoints: binnedData, min: dMin, max: dMax };
+            }
+
+            // --- グラフ描画 ---
+            function drawLinearChart(canvasId, chartInstance, binned, xMin, xMax, mu, targetStd, color, title, saveRef) {
+                const ctx = document.getElementById(canvasId).getContext('2d');
+                if (chartInstance) chartInstance.destroy();
+
+                const lines = [
+                    { value: mu, color: 'rgba(255, 0, 0, 0.8)', width: 2 },
+                    { value: mu + targetStd, color: 'rgba(0, 0, 255, 0.6)', width: 2, dashed: [5, 5] },
+                    { value: mu - targetStd, color: 'rgba(0, 0, 255, 0.6)', width: 2, dashed: [5, 5] }
+                ];
+
+                const newChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        datasets: [{
+                            label: title,
+                            data: binned.dataPoints,
+                            backgroundColor: color + '99',
+                            borderColor: color,
+                            borderWidth: 1,
+                            barPercentage: 1.0,
+                            categoryPercentage: 1.0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        animation: { duration: 0 },
+                        scales: {
+                            x: {
+                                type: 'linear',
+                                min: xMin,
+                                max: xMax,
+                                title: { display: true, text: '値' }
+                            },
+                            y: { beginAtZero: true, title: { display: true, text: '相対度数' } }
+                        },
+                        plugins: {
+                            legend: { display: false },
+                            verticalLines: { lines: lines }
+                        }
+                    }
+                });
+                saveRef(newChart);
+            }
+
+            function runSimulation() {
+                const distKey = selectDist.value;
+                const conf = distConfig[distKey];
+                const pVals = getCurrentParams(distKey);
+                const stats = conf.stats(pVals);
+                const n = parseInt(inputN.value);
+                const isFixedScale = checkFixed.checked;
+
+                updateFormulaUI(conf, stats, n);
+
+                // データ生成
+                let popData = [];
+                for(let i=0; i<50000; i++) popData.push(conf.gen(pVals));
+
+                let smpData = [];
+                for(let i=0; i<TRIALS; i++) {
+                    let sum = 0;
+                    for(let j=0; j<n; j++) sum += conf.gen(pVals);
+                    smpData.push(sum / n);
+                }
+
+                // ビン分割
+                const popBinned = createLinearBins(popData, conf.discrete, 60);
+                
+                // 標本平均側の階級数: 固定スケールの場合は細かく(100)、自動ズームの場合は滑らかに(60)
+                const smpBinsCount = isFixedScale ? 100 : 60;
+                // 標本平均は連続とみなしてビンを切る（nが大きいと離散分布でも連続的になるため）
+                const smpBinned = createLinearBins(smpData, conf.discrete && n === 1, smpBinsCount);
+
+                const popStd = Math.sqrt(stats.var);
+                const smpStd = popStd / Math.sqrt(n);
+
+                // スケールの決定
+                const smpXMin = isFixedScale ? popBinned.min : smpBinned.min;
+                const smpXMax = isFixedScale ? popBinned.max : smpBinned.max;
+
+                axisInfoSmp.textContent = isFixedScale ? "※ X軸スケール固定中：分散が縮小し、グラフの幅が狭くなる様子を確認できます。" : "※ 自動ズーム中：横幅が拡大され、美しい釣鐘型（正規分布）を確認できます。";
+                axisInfoSmp.style.color = isFixedScale ? "#d32f2f" : "#1976d2";
+
+                drawLinearChart('chart-population', popChart, popBinned, popBinned.min, popBinned.max, stats.mu, popStd, '#ab47bc', '母集団の分布', (c) => popChart = c);
+                drawLinearChart('chart-sample-mean', smpChart, smpBinned, smpXMin, smpXMax, stats.mu, smpStd, '#1e88e5', '標本平均の分布', (c) => smpChart = c);
+            }
+
+            selectDist.addEventListener('change', () => { buildParamUI(); runSimulation(); });
+            checkFixed.addEventListener('change', () => runSimulation());
+
+            function updateN(val) {
+                inputN.value = val;
+                labelN.textContent = val;
+                arrowN.textContent = val;
+                nButtons.forEach(btn => {
+                    if(btn.getAttribute('data-n') === String(val)) btn.classList.add('active');
+                    else btn.classList.remove('active');
+                });
+                runSimulation();
+            }
+
+            inputN.addEventListener('input', (e) => updateN(e.target.value));
+            nButtons.forEach(btn => btn.addEventListener('click', (e) => updateN(e.target.getAttribute('data-n'))));
+
+            buildParamUI();
+            updateN(1);
+        });
+    </script>
+</body>
+</html>

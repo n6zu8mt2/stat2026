@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>点推定・区間推定 総合シミュレーター</title>
+    <script>
+        window.MathJax = {
+          tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
+          svg: { fontCache: 'global' },
+          startup: { typeset: true }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        /* =========================================
+           共通スタイル (inf_stat.html準拠)
+        ========================================= */
+        body {
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+            color: #333;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .page-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #fff;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .main-content {
+            padding: 30px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 { margin: 0; color: #2c3e50; font-size: 1.8em; }
+        .header p { color: #666; margin-top: 5px; }
+
+        /* =========================================
+           説明セクション
+        ========================================= */
+        .description {
+            background-color: #f8f9fa;
+            border-left: 5px solid #2e7d32;
+            padding: 25px;
+            border-radius: 4px;
+            margin-bottom: 30px;
+        }
+        .description h2 { margin-top: 0; color: #1b5e20; font-size: 1.4em; border-bottom: 2px solid #a5d6a7; padding-bottom: 8px; }
+        .description h3 { color: #2e7d32; font-size: 1.1em; margin-top: 20px; margin-bottom: 10px; }
+        .math-box { background: #fff; padding: 15px; border: 1px solid #e0e0e0; border-radius: 6px; margin: 15px 0; }
+        .prop-list { list-style-type: none; padding-left: 0; }
+        .prop-list li { background: #e8f5e9; margin-bottom: 8px; padding: 10px 15px; border-radius: 4px; border-left: 4px solid #4caf50; }
+        
+        .simulator-section { display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 40px; }
+        .section-divider { border-top: 2px dashed #ccc; margin: 40px 0; }
+        
+        /* =========================================
+           コントロールパネル
+        ========================================= */
+        .controls-panel {
+            flex: 1; min-width: 350px; background: #f1f8e9; padding: 20px;
+            border-radius: 8px; border: 1px solid #aed581; display: flex; flex-direction: column; gap: 20px;
+        }
+        .controls-panel h3 { margin-top: 0; color: #33691e; border-bottom: 2px solid #8bc34a; padding-bottom: 5px; }
+        .setting-group {
+            display: flex; flex-direction: column; gap: 8px; background: #fff; padding: 15px; border-radius: 6px; border: 1px solid #c5e1a5;
+        }
+        .main-label { font-weight: bold; color: #33691e; font-size: 0.95em; }
+        select, input[type="text"], input[type="number"] { padding: 8px; font-size: 1em; border: 1px solid #ccc; border-radius: 4px; width: 100%; box-sizing: border-box; }
+        
+        /* アクションボタン */
+        .action-btn {
+            background-color: #4caf50; color: white; border: none; padding: 12px; font-size: 1.1em;
+            border-radius: 6px; cursor: pointer; font-weight: bold; transition: background 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .action-btn:hover { background-color: #388e3c; }
+        .action-btn:active { transform: translateY(2px); box-shadow: none; }
+
+        /* =========================================
+           グラフ・結果パネル
+        ========================================= */
+        .visualization-panel { flex: 2; min-width: 450px; display: flex; flex-direction: column; gap: 15px; }
+        
+        /* 計算結果エリア */
+        .result-box {
+            background: #fff; border: 1px solid #ccc; border-radius: 8px; padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05); font-size: 0.95em;
+        }
+        .result-box h4 { margin-top: 0; color: #2c3e50; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 10px; }
+        .calc-details { background: #fafafa; padding: 10px; border-radius: 4px; border: 1px inset #eee; }
+        .calc-row { display: flex; justify-content: space-between; margin-bottom: 8px; border-bottom: 1px dashed #ddd; padding-bottom: 5px;}
+        .calc-row:last-child { border-bottom: none; }
+        .highlight-val { color: #d32f2f; font-weight: bold; font-size: 1.1em; }
+
+        .graph-box { background: #fff; border: 1px solid #ccc; border-radius: 8px; padding: 25px 15px 15px 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); position: relative; }
+        .graph-title { margin-top: 0; margin-bottom: 5px; padding-left: 8px; border-left: 4px solid #4caf50; color: #2e7d32; }
+        .canvas-wrapper { width: 100%; height: 200px; }
+
+        /* 反復シミュレータ用統計情報 */
+        .stats-container { display: flex; justify-content: space-around; background: #fafafa; padding: 15px; border-radius: 6px; border: 1px inset #eee; font-size: 1.1em; margin-bottom: 15px;}
+        .stat-item { text-align: center; }
+        .stat-value { font-size: 1.5em; font-weight: bold; display: block; margin-top: 5px; }
+        .val-success { color: #2e7d32; }
+        .val-fail { color: #c62828; }
+
+        .canvas-container-large {
+            width: 100%; height: 400px; background: #fff; border: 1px solid #ddd;
+            border-radius: 4px; position: relative;
+        }
+        .canvas-container-large canvas { width: 100%; height: 100%; display: block; }
+
+        @media (max-width: 768px) { .simulator-section { flex-direction: column; } .visualization-panel { min-width: 100%; } }
+    </style>
+</head>
+<body>
+    <div class="page-wrapper">
+        <div class="main-content">
+            <div class="header">
+                <h1>推測統計：点推定・区間推定 総合シミュレーター</h1>
+                <p>〜 確率論的枠組みの理解から、信頼区間の真の解釈まで 〜</p>
+            </div>
+
+            <div class="container">
+                <section class="description">
+                    <h2>問題設定と確率論的枠組み</h2>
+                    <p>
+                        <b>【問題】</b> Sサイズのポテト10個をランダムに選び、本数を計測した。データは <b>47, 51, 49, 50, 49, 46, 51, 48, 52, 49</b> であった。<br>
+                        過去のデータから、ポテトの本数の母集団は正規分布に従うと仮定する。このとき、ポテトの本数の母平均 $\mu$ を区間推定する。
+                    </p>
+                    
+                    <h3>1. 標本空間 $\Omega$ と事象 $\omega$</h3>
+                    <ul class="prop-list">
+                        <li><strong>標本空間 $\Omega$:</strong> ポテトを10個抽出したときの本数の組み合わせ全パターンの集合です。$\Omega = \{ \omega = (a_1, a_2,\dots, a_{10}) \mid a_1, \dots, a_{10} \text{ は実数} \}$ と定義されます。</li>
+                        <li><strong>事象 $\omega$:</strong> 実際に抽出が行われ、確定した「1回の結果」です。今回の測定により、特定の $\omega = (47, 51, 49, 50, 49, 46, 51, 48, 52, 49)$ が1つ決定されました。</li>
+                    </ul>
+
+                    <h3>2. 確率変数 $X_i$ と 実現値 $X_i(\omega)$</h3>
+                    <ul class="prop-list">
+                        <li><strong>確率変数 $X_i$: </strong> $i$ 番目に選ばれたポテトの本数を表す関数です。$X_i(\omega) = a_i$ と表されます。</li>
+                        <li><strong>実現値 $x_i$:</strong> 関数 $X_i$ に $\omega$ が入力されて吐き出された具体的な数値です。私たちが手にしたデータは既に値が固定された $x_1 = 47, x_2 = 51, \dots, x_{10} = 49$ です。</li>
+                    </ul>
+                </section>
+
+                <!-- ＝＝＝＝＝ パート1：計算シミュレータ ＝＝＝＝＝ -->
+                <h2 style="color:#1b5e20; text-align:center;">【PART 1】 手元のデータから信頼区間を計算する</h2>
+                <section class="simulator-section">
+                    <div class="controls-panel">
+                        <h3>推定の設定</h3>
+                        
+                        <div class="setting-group">
+                            <label class="main-label">1. 観測されたデータ (実現値 $x_i$)</label>
+                            <input type="text" id="input-data" value="47, 51, 49, 50, 49, 46, 51, 48, 52, 49">
+                            <p style="font-size:0.8em; color:#666; margin:4px 0 0 0;">※カンマ区切りで入力</p>
+                        </div>
+
+                        <div class="setting-group">
+                            <label class="main-label">2. 母分散 $\sigma^2$ の仮定</label>
+                            <select id="variance-mode">
+                                <option value="known">【既知】 σ² = 4 (問題文の通り)</option>
+                                <option value="unknown">【未知】 データから不偏分散 s² を計算して代用</option>
+                            </select>
+                        </div>
+
+                        <div class="setting-group">
+                            <label class="main-label">3. 信頼区間</label>
+                            <select id="confidence-level-1">
+                                <option value="90">90% 信頼区間</option>
+                                <option value="95" selected>95% 信頼区間</option>
+                                <option value="99">99% 信頼区間</option>
+                            </select>
+                        </div>
+
+                        <button id="btn-calc" class="action-btn">推定を実行する</button>
+                    </div>
+
+                    <div class="visualization-panel">
+                        <div class="result-box">
+                            <h4>推定の計算結果</h4>
+                            <div class="calc-details" id="calc-output">
+                                <!-- JSで挿入 -->
+                            </div>
+                        </div>
+
+                        <div class="graph-box">
+                            <h4 class="graph-title">母平均 $\mu$ の区間推定</h4>
+                            <div class="canvas-wrapper">
+                                <canvas id="chart-interval"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <div class="section-divider"></div>
+
+                <!-- ＝＝＝＝＝ パート2：反復シミュレータ ＝＝＝＝＝ -->
+                <h2 style="color:#1b5e20; text-align:center;">【PART 2】 信頼区間の「真の意味」を体感する</h2>
+                <section class="description" style="border-left-color: #0277bd; background-color: #f0f8ff;">
+                    <h2 style="color: #01579b; border-bottom-color: #81d4fa;">「95%信頼区間」の頻度論的解釈</h2>
+                    <p>
+                        本来、母集団分布や母平均 $\mu$ ・母標準偏差 $\sigma$ はわからないものです。「95%の確率で真の母平均を含む」とは、<strong>同じ手順で「10個抽出して区間推定」を100回繰り返したとき、作られた100個の区間のうち約95個が真の母平均 $\mu$ を包含する</strong>ことを意味します。<br>
+                        ここでは神様の視点として、真の母平均 $\mu=49$、真の母分散 $\sigma^2=4$ と設定してシミュレーションを行います（推定者は母分散を「未知」として不偏分散から $t$ 分布を利用します）。
+                    </p>
+                </section>
+
+                <section class="simulator-section">
+                    <div class="controls-panel" style="background:#e1f5fe; border-color:#81d4fa;">
+                        <h3 style="color:#0277bd; border-bottom-color:#4fc3f7;">反復シミュレーション設定</h3>
+                        
+                        <div class="setting-group" style="border-color:#b3e5fc;">
+                            <label class="main-label" style="color:#0277bd;">信頼区間</label>
+                            <select id="confidence-level-2">
+                                <option value="90">90% 信頼区間</option>
+                                <option value="95" selected>95% 信頼区間</option>
+                                <option value="99">99% 信頼区間</option>
+                            </select>
+                        </div>
+                        
+                        <div class="setting-group" style="border-color:#b3e5fc;">
+                            <label class="main-label" style="color:#0277bd;">試行回数 (抽出の反復数)</label>
+                            <input type="number" id="num-trials" value="100" min="10" max="500" step="10">
+                        </div>
+
+                        <button id="btn-run" class="action-btn" style="background-color:#03a9f4;">100回 区間推定を行う</button>
+                    </div>
+
+                    <div class="visualization-panel">
+                        <div class="result-box">
+                            <h4>シミュレーション結果（各回で母分散: 未知として $t$ 分布で計算）</h4>
+                            
+                            <div class="stats-container">
+                                <div class="stat-item">試行回数<span class="stat-value" id="stat-total">100</span></div>
+                                <div class="stat-item">真の $\mu$ を含んだ<span class="stat-value val-success" id="stat-success">0</span></div>
+                                <div class="stat-item">外した<span class="stat-value val-fail" id="stat-fail">0</span></div>
+                                <div class="stat-item">含有率<span class="stat-value" id="stat-rate" style="color:#0277bd;">0.0%</span></div>
+                            </div>
+
+                            <div class="canvas-container-large">
+                                <canvas id="ci-canvas"></canvas>
+                            </div>
+                            <p style="font-size: 0.85em; color: #666; text-align: center; margin-top: 8px;">
+                                縦の破線：真の母平均 $\mu = 49$<br>
+                                各横線：1回の抽出データから作られた信頼区間。緑は $\mu$ を含み、赤は外しています。
+                            </p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // 共通・テーブルデータ
+        // ==========================================
+        const zTable = { 90: 1.645, 95: 1.960, 99: 2.576 };
+        
+        // t分布のパーセント点表 (自由度 df=1〜20)
+        const tTable = {
+            90: [0, 6.314, 2.920, 2.353, 2.132, 2.015, 1.943, 1.895, 1.860, 1.833, 1.812, 1.796, 1.782, 1.771, 1.761, 1.753, 1.746, 1.740, 1.734, 1.729, 1.725],
+            95: [0, 12.706, 4.303, 3.182, 2.776, 2.571, 2.447, 2.365, 2.306, 2.262, 2.228, 2.201, 2.179, 2.160, 2.145, 2.131, 2.120, 2.110, 2.101, 2.093, 2.086],
+            99: [0, 63.657, 9.925, 5.841, 4.604, 4.032, 3.707, 3.499, 3.355, 3.250, 3.169, 3.106, 3.055, 3.012, 2.977, 2.947, 2.921, 2.898, 2.878, 2.861, 2.845]
+        };
+
+        // 正規乱数生成 (Box-Muller)
+        function generateNormal(mu, sigma) {
+            let u1 = Math.random(), u2 = Math.random();
+            let z = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+            return z * sigma + mu;
+        }
+
+
+        // ==========================================
+        // PART 1: 計算シミュレータ
+        // ==========================================
+        let chartInstance = null;
+
+        function performEstimation() {
+            const dataStr = document.getElementById('input-data').value;
+            const dataArr = dataStr.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
+            const n = dataArr.length;
+
+            if (n <= 1) { alert("区間推定には2つ以上のデータが必要です。"); return; }
+
+            const mean = dataArr.reduce((a, b) => a + b, 0) / n;
+            const unbiasedVar = dataArr.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / (n - 1);
+            
+            const mode = document.getElementById('variance-mode').value;
+            const confLevel = parseInt(document.getElementById('confidence-level-1').value);
+
+            let varianceUsed, stdError, criticalValue, distributionUsed;
+
+            if (mode === 'known') {
+                varianceUsed = 4; // 問題設定
+                stdError = Math.sqrt(varianceUsed) / Math.sqrt(n);
+                criticalValue = zTable[confLevel];
+                distributionUsed = `標準正規分布 $Z_{\\alpha/2} = ${criticalValue}$`;
+            } else {
+                varianceUsed = unbiasedVar;
+                stdError = Math.sqrt(varianceUsed) / Math.sqrt(n);
+                const df = n - 1;
+                criticalValue = (df <= 20) ? tTable[confLevel][df] : zTable[confLevel];
+                distributionUsed = (df <= 20) ? `$t$ 分布 (自由度 ${df}) $t = ${criticalValue}$` : `近似的に正規分布を利用`;
+            }
+
+            const marginOfError = criticalValue * stdError;
+            const lowerBound = mean - marginOfError;
+            const upperBound = mean + marginOfError;
+
+            const outputDiv = document.getElementById('calc-output');
+            outputDiv.innerHTML = `
+                <div class="calc-row"><span>サンプルサイズ $n$</span> <span>${n}</span></div>
+                <div class="calc-row"><span>標本平均 $\\overline{x}$ (点推定値)</span> <span class="highlight-val">${mean.toFixed(2)}</span></div>
+                <div class="calc-row"><span>標本不偏分散 $s^2$</span> <span>${unbiasedVar.toFixed(3)}</span></div>
+                <div class="calc-row"><span>使用する母分散 $\\sigma^2$</span> <span>${mode === 'known' ? '4 (既知)' : `${unbiasedVar.toFixed(3)} (不偏分散を代用)`}</span></div>
+                <div class="calc-row"><span>標準誤差 $SE$</span> <span>${stdError.toFixed(4)}</span></div>
+                <div class="calc-row"><span>利用する確率分布と係数</span> <span>${distributionUsed}</span></div>
+                <div class="calc-row"><span>誤差マージン</span> <span>$\\pm ${marginOfError.toFixed(3)}$</span></div>
+                <div class="calc-row" style="margin-top:10px; font-weight:bold; background:#e8f5e9; padding:10px; border-radius:4px;">
+                    <span>${confLevel}% 信頼区間</span>
+                    <span class="highlight-val" style="color:#2e7d32;">[ ${lowerBound.toFixed(2)}, ${upperBound.toFixed(2)} ]</span>
+                </div>
+            `;
+            if (window.MathJax) { MathJax.typesetPromise([outputDiv]).catch(err => console.log(err)); }
+
+            drawIntervalChart(mean, lowerBound, upperBound, confLevel);
+        }
+
+        function drawIntervalChart(mean, lower, upper, confLevel) {
+            const ctx = document.getElementById('chart-interval').getContext('2d');
+            if (chartInstance) chartInstance.destroy();
+
+            const range = upper - lower;
+            const xMin = lower - range * 0.5;
+            const xMax = upper + range * 0.5;
+
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    datasets: [
+                        { label: `${confLevel}% 信頼区間`, data: [{ x: lower, y: 1 }, { x: upper, y: 1 }], borderColor: '#2e7d32', borderWidth: 4, pointRadius: 0, showLine: true },
+                        { label: `下限 (${lower.toFixed(2)})`, data: [{ x: lower, y: 1 }], backgroundColor: '#2e7d32', borderColor: '#fff', borderWidth: 2, pointRadius: 6, pointStyle: 'rect' },
+                        { label: `上限 (${upper.toFixed(2)})`, data: [{ x: upper, y: 1 }], backgroundColor: '#2e7d32', borderColor: '#fff', borderWidth: 2, pointRadius: 6, pointStyle: 'rect' },
+                        { type: 'scatter', label: `標本平均 = ${mean.toFixed(2)}`, data: [{ x: mean, y: 1 }], backgroundColor: '#d32f2f', borderColor: '#fff', borderWidth: 2, pointRadius: 8 }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: { x: { type: 'linear', min: xMin, max: xMax }, y: { display: false, min: 0, max: 2 } },
+                    plugins: { legend: { position: 'top' } }
+                }
+            });
+        }
+
+
+        // ==========================================
+        // PART 2: 反復シミュレータ
+        // ==========================================
+        const TRUE_MU = 49;
+        const TRUE_SIGMA = 2; // 分散は4
+        const SAMPLE_SIZE = 10; 
+
+        function runIterativeSimulation() {
+            const confLevel = parseInt(document.getElementById('confidence-level-2').value);
+            const numTrials = parseInt(document.getElementById('num-trials').value);
+            
+            // df = n-1 = 9
+            const tValue = tTable[confLevel][9];
+            let successCount = 0;
+            let intervals = [];
+
+            for (let j = 0; j < numTrials; j++) {
+                let sample = [];
+                for(let i = 0; i < SAMPLE_SIZE; i++) sample.push(generateNormal(TRUE_MU, TRUE_SIGMA));
+
+                let sum = sample.reduce((a, b) => a + b, 0);
+                let mean = sum / SAMPLE_SIZE;
+                let variance = sample.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / (SAMPLE_SIZE - 1);
+                let stdError = Math.sqrt(variance / SAMPLE_SIZE);
+
+                let marginOfError = tValue * stdError;
+                let lowerBound = mean - marginOfError;
+                let upperBound = mean + marginOfError;
+
+                let containsMu = (TRUE_MU >= lowerBound && TRUE_MU <= upperBound);
+                if (containsMu) successCount++;
+
+                intervals.push({ mean, lower: lowerBound, upper: upperBound, containsMu });
+            }
+
+            document.getElementById('stat-total').innerText = numTrials;
+            document.getElementById('stat-success').innerText = successCount;
+            document.getElementById('stat-fail').innerText = numTrials - successCount;
+            document.getElementById('stat-rate').innerText = ((successCount / numTrials) * 100).toFixed(1) + '%';
+            document.getElementById('btn-run').innerText = `${numTrials}回 区間推定を行う`;
+
+            drawIterativeCanvas(intervals, numTrials);
+        }
+
+        function drawIterativeCanvas(intervals, numTrials) {
+            const canvas = document.getElementById('ci-canvas');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const paddingX = 20, paddingY = 20;
+            const plotWidth = canvas.width - paddingX * 2;
+            const plotHeight = canvas.height - paddingY * 2;
+
+            const minX = TRUE_MU - TRUE_SIGMA * 2.5; 
+            const maxX = TRUE_MU + TRUE_SIGMA * 2.5;
+
+            const getX = (val) => paddingX + ((val - minX) / (maxX - minX)) * plotWidth;
+            const getY = (index) => paddingY + (index / (numTrials - 1 || 1)) * plotHeight;
+
+            // 真の母平均のライン
+            const trueMuX = getX(TRUE_MU);
+            ctx.beginPath();
+            ctx.setLineDash([5, 5]);
+            ctx.moveTo(trueMuX, 0);
+            ctx.lineTo(trueMuX, canvas.height);
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // 各信頼区間
+            intervals.forEach((interval, index) => {
+                const y = getY(index);
+                const xLower = getX(interval.lower);
+                const xUpper = getX(interval.upper);
+                const xMean = getX(interval.mean);
+
+                ctx.strokeStyle = interval.containsMu ? 'rgba(46, 125, 50, 0.7)' : 'rgba(198, 40, 40, 1)';
+                ctx.fillStyle = interval.containsMu ? 'rgba(46, 125, 50, 0.7)' : 'rgba(198, 40, 40, 1)';
+                ctx.lineWidth = 2;
+
+                ctx.beginPath(); ctx.moveTo(xLower, y); ctx.lineTo(xUpper, y); ctx.stroke();
+                ctx.beginPath(); ctx.arc(xMean, y, 2.5, 0, Math.PI * 2); ctx.fill();
+            });
+        }
+
+        // ==========================================
+        // イベントリスナー
+        // ==========================================
+        window.addEventListener('resize', () => {
+            if (document.getElementById('stat-total').innerText !== "0") {
+                document.getElementById('btn-run').click();
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('btn-calc').addEventListener('click', performEstimation);
+            document.getElementById('btn-run').addEventListener('click', runIterativeSimulation);
+            
+            // 初期実行
+            performEstimation();
+            runIterativeSimulation();
+        });
+    </script>
+</body>
+</html>
