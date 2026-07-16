@@ -16,7 +16,7 @@
     
     <style>
         /* =========================================
-           共通スタイル (inf_stat.html準拠)
+           共通スタイル
         ========================================= */
         body {
             font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
@@ -56,7 +56,6 @@
         }
         .description h2 { margin-top: 0; color: #1b5e20; font-size: 1.4em; border-bottom: 2px solid #a5d6a7; padding-bottom: 8px; }
         .description h3 { color: #2e7d32; font-size: 1.1em; margin-top: 20px; margin-bottom: 10px; }
-        .math-box { background: #fff; padding: 15px; border: 1px solid #e0e0e0; border-radius: 6px; margin: 15px 0; }
         .prop-list { list-style-type: none; padding-left: 0; }
         .prop-list li { background: #e8f5e9; margin-bottom: 8px; padding: 10px 15px; border-radius: 4px; border-left: 4px solid #4caf50; }
         
@@ -67,7 +66,7 @@
            コントロールパネル
         ========================================= */
         .controls-panel {
-            flex: 1; min-width: 350px; background: #f1f8e9; padding: 20px;
+            flex: 1; min-width: 300px; background: #f1f8e9; padding: 20px;
             border-radius: 8px; border: 1px solid #aed581; display: flex; flex-direction: column; gap: 20px;
         }
         .controls-panel h3 { margin-top: 0; color: #33691e; border-bottom: 2px solid #8bc34a; padding-bottom: 5px; }
@@ -75,49 +74,72 @@
             display: flex; flex-direction: column; gap: 8px; background: #fff; padding: 15px; border-radius: 6px; border: 1px solid #c5e1a5;
         }
         .main-label { font-weight: bold; color: #33691e; font-size: 0.95em; }
-        select, input[type="text"], input[type="number"] { padding: 8px; font-size: 1em; border: 1px solid #ccc; border-radius: 4px; width: 100%; box-sizing: border-box; }
+        select, input[type="text"], input[type="number"], input[type="range"] { padding: 8px; font-size: 1em; border: 1px solid #ccc; border-radius: 4px; width: 100%; box-sizing: border-box; }
         
-        /* アクションボタン */
+        .checkbox-group { display: flex; gap: 15px; flex-wrap: wrap; }
+        .checkbox-label { display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 0.95em; }
+
         .action-btn {
             background-color: #4caf50; color: white; border: none; padding: 12px; font-size: 1.1em;
             border-radius: 6px; cursor: pointer; font-weight: bold; transition: background 0.3s;
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            text-align: center;
         }
         .action-btn:hover { background-color: #388e3c; }
         .action-btn:active { transform: translateY(2px); box-shadow: none; }
+        
+        .btn-outline {
+            background-color: transparent; color: #4caf50; border: 2px solid #4caf50;
+        }
+        .btn-outline:hover { background-color: #e8f5e9; }
 
         /* =========================================
            グラフ・結果パネル
         ========================================= */
         .visualization-panel { flex: 2; min-width: 450px; display: flex; flex-direction: column; gap: 15px; }
         
-        /* 計算結果エリア */
         .result-box {
             background: #fff; border: 1px solid #ccc; border-radius: 8px; padding: 15px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05); font-size: 0.95em;
         }
         .result-box h4 { margin-top: 0; color: #2c3e50; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 10px; }
-        .calc-details { background: #fafafa; padding: 10px; border-radius: 4px; border: 1px inset #eee; }
-        .calc-row { display: flex; justify-content: space-between; margin-bottom: 8px; border-bottom: 1px dashed #ddd; padding-bottom: 5px;}
-        .calc-row:last-child { border-bottom: none; }
-        .highlight-val { color: #d32f2f; font-weight: bold; font-size: 1.1em; }
-
-        .graph-box { background: #fff; border: 1px solid #ccc; border-radius: 8px; padding: 25px 15px 15px 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); position: relative; }
+        
+        .graph-box { background: #fff; border: 1px solid #ccc; border-radius: 8px; padding: 20px 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .graph-title { margin-top: 0; margin-bottom: 5px; padding-left: 8px; border-left: 4px solid #4caf50; color: #2e7d32; }
-        .canvas-wrapper { width: 100%; height: 200px; }
+        .canvas-wrapper { width: 100%; height: 250px; }
 
-        /* 反復シミュレータ用統計情報 */
+        /* 1回抽出の明細パネル */
+        .detail-panel {
+            background: #e1f5fe; border: 1px solid #81d4fa; border-radius: 6px; padding: 15px;
+            margin-top: 15px; font-size: 0.95em; display: none;
+        }
+        .detail-panel h5 { margin: 0 0 10px 0; color: #01579b; border-bottom: 1px solid #b3e5fc; padding-bottom: 5px; }
+        .detail-row { display: flex; justify-content: space-between; margin-bottom: 5px; border-bottom: 1px dashed #b3e5fc; padding-bottom: 4px; }
+        .detail-row:last-child { border-bottom: none; }
+        .data-raw { background: #fff; padding: 8px; border-radius: 4px; border: 1px solid #b3e5fc; font-family: monospace; word-break: break-all; margin-bottom: 10px; color: #444; }
+
+        /* 統計コンテナ */
         .stats-container { display: flex; justify-content: space-around; background: #fafafa; padding: 15px; border-radius: 6px; border: 1px inset #eee; font-size: 1.1em; margin-bottom: 15px;}
         .stat-item { text-align: center; }
         .stat-value { font-size: 1.5em; font-weight: bold; display: block; margin-top: 5px; }
-        .val-success { color: #2e7d32; }
-        .val-fail { color: #c62828; }
 
+        /* ラダープロット用キャンバス */
         .canvas-container-large {
-            width: 100%; height: 400px; background: #fff; border: 1px solid #ddd;
+            width: 100%; height: 350px; background: #fff; border: 1px solid #ddd;
             border-radius: 4px; position: relative;
         }
         .canvas-container-large canvas { width: 100%; height: 100%; display: block; }
+
+        /* テーブルスタイル */
+        .table-container {
+            max-height: 250px; overflow-y: auto; margin-top: 15px; border: 1px solid #eee; border-radius: 4px;
+        }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85em; text-align: center; }
+        th { background: #f0f0f0; padding: 8px; position: sticky; top: 0; z-index: 1; border-bottom: 2px solid #ccc;}
+        td { padding: 6px; border-bottom: 1px solid #eee; }
+        .row-success { background-color: rgba(46, 125, 50, 0.05); }
+        .row-fail { background-color: rgba(198, 40, 40, 0.05); color: #c62828; }
+        .data-cell { font-size: 0.8em; color: #666; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
         @media (max-width: 768px) { .simulator-section { flex-direction: column; } .visualization-panel { min-width: 100%; } }
     </style>
@@ -130,6 +152,7 @@
                 <p>〜 確率論的枠組みの理解から、信頼区間の真の解釈まで 〜</p>
             </div>
 
+            <!-- ＝＝＝＝＝ パート1：計算シミュレータ ＝＝＝＝＝ -->
             <div class="container">
                 <section class="description">
                     <h2>問題設定と確率論的枠組み</h2>
@@ -137,32 +160,16 @@
                         <b>【問題】</b> Sサイズのポテト10個をランダムに選び、本数を計測した。データは <b>47, 51, 49, 50, 49, 46, 51, 48, 52, 49</b> であった。<br>
                         過去のデータから、ポテトの本数の母集団は正規分布に従うと仮定する。このとき、ポテトの本数の母平均 $\mu$ を区間推定する。
                     </p>
-                    
-                    <h3>1. 標本空間 $\Omega$ と事象 $\omega$</h3>
-                    <ul class="prop-list">
-                        <li><strong>標本空間 $\Omega$:</strong> ポテトを10個抽出したときの本数の組み合わせ全パターンの集合です。$\Omega = \{ \omega = (a_1, a_2,\dots, a_{10}) \mid a_1, \dots, a_{10} \text{ は実数} \}$ と定義されます。</li>
-                        <li><strong>事象 $\omega$:</strong> 実際に抽出が行われ、確定した「1回の結果」です。今回の測定により、特定の $\omega = (47, 51, 49, 50, 49, 46, 51, 48, 52, 49)$ が1つ決定されました。</li>
-                    </ul>
-
-                    <h3>2. 確率変数 $X_i$ と 実現値 $X_i(\omega)$</h3>
-                    <ul class="prop-list">
-                        <li><strong>確率変数 $X_i$: </strong> $i$ 番目に選ばれたポテトの本数を表す関数です。$X_i(\omega) = a_i$ と表されます。</li>
-                        <li><strong>実現値 $x_i$:</strong> 関数 $X_i$ に $\omega$ が入力されて吐き出された具体的な数値です。私たちが手にしたデータは既に値が固定された $x_1 = 47, x_2 = 51, \dots, x_{10} = 49$ です。</li>
-                    </ul>
                 </section>
 
-                <!-- ＝＝＝＝＝ パート1：計算シミュレータ ＝＝＝＝＝ -->
                 <h2 style="color:#1b5e20; text-align:center;">【PART 1】 手元のデータから信頼区間を計算する</h2>
                 <section class="simulator-section">
                     <div class="controls-panel">
                         <h3>推定の設定</h3>
-                        
                         <div class="setting-group">
                             <label class="main-label">1. 観測されたデータ (実現値 $x_i$)</label>
                             <input type="text" id="input-data" value="47, 51, 49, 50, 49, 46, 51, 48, 52, 49">
-                            <p style="font-size:0.8em; color:#666; margin:4px 0 0 0;">※カンマ区切りで入力</p>
                         </div>
-
                         <div class="setting-group">
                             <label class="main-label">2. 母分散 $\sigma^2$ の仮定</label>
                             <select id="variance-mode">
@@ -170,32 +177,19 @@
                                 <option value="unknown">【未知】 データから不偏分散 s² を計算して代用</option>
                             </select>
                         </div>
-
                         <div class="setting-group">
-                            <label class="main-label">3. 信頼区間</label>
+                            <label class="main-label">3. 信頼水準</label>
                             <select id="confidence-level-1">
                                 <option value="90">90% 信頼区間</option>
                                 <option value="95" selected>95% 信頼区間</option>
                                 <option value="99">99% 信頼区間</option>
                             </select>
                         </div>
-
                         <button id="btn-calc" class="action-btn">推定を実行する</button>
                     </div>
-
                     <div class="visualization-panel">
-                        <div class="result-box">
-                            <h4>推定の計算結果</h4>
-                            <div class="calc-details" id="calc-output">
-                                <!-- JSで挿入 -->
-                            </div>
-                        </div>
-
-                        <div class="graph-box">
-                            <h4 class="graph-title">母平均 $\mu$ の区間推定</h4>
-                            <div class="canvas-wrapper">
-                                <canvas id="chart-interval"></canvas>
-                            </div>
+                        <div class="result-box" id="calc-output">
+                            <!-- JSで挿入 -->
                         </div>
                     </div>
                 </section>
@@ -203,43 +197,77 @@
                 <div class="section-divider"></div>
 
                 <!-- ＝＝＝＝＝ パート2：反復シミュレータ ＝＝＝＝＝ -->
-                <h2 style="color:#1b5e20; text-align:center;">【PART 2】 信頼区間の「真の意味」を体感する</h2>
+                <h2 style="color:#1b5e20; text-align:center;">【PART 2】 信頼区間の「真の意味」を視覚的に体感する</h2>
                 <section class="description" style="border-left-color: #0277bd; background-color: #f0f8ff;">
-                    <h2 style="color: #01579b; border-bottom-color: #81d4fa;">「95%信頼区間」の頻度論的解釈</h2>
+                    <h2 style="color: #01579b; border-bottom-color: #81d4fa;">母集団からの「無作為抽出」と「区間推定」の反復</h2>
                     <p>
-                        本来、母集団分布や母平均 $\mu$ ・母標準偏差 $\sigma$ はわからないものです。「95%の確率で真の母平均を含む」とは、<strong>同じ手順で「10個抽出して区間推定」を100回繰り返したとき、作られた100個の区間のうち約95個が真の母平均 $\mu$ を包含する</strong>ことを意味します。<br>
-                        ここでは神様の視点として、真の母平均 $\mu=49$、真の母分散 $\sigma^2=4$ と設定してシミュレーションを行います（推定者は母分散を「未知」として不偏分散から $t$ 分布を利用します）。
+                        本来、母集団分布や母平均 $\mu$ はわからないものです。「95%の確率で真の母平均を含む」とは、<strong>「抽出→区間推定」の手順を何度も繰り返したとき、得られた区間の約95%が真の母平均を包含する</strong>ことを意味します。<br>
+                        ここでは神様の視点として、真の母集団が <b>母平均 $\mu=49$、母分散 $\sigma^2=4$ の正規分布</b> であると設定します。<br>
+                        複数の信頼水準（90%, 95%, 99%）にチェックを入れることで、<b>同じデータから作られる信頼区間の幅（長さ）の違い</b>を同時に比較できます。
                     </p>
                 </section>
 
                 <section class="simulator-section">
-                    <div class="controls-panel" style="background:#e1f5fe; border-color:#81d4fa;">
-                        <h3 style="color:#0277bd; border-bottom-color:#4fc3f7;">反復シミュレーション設定</h3>
+                    <div class="controls-panel" style="background:#e1f5fe; border-color:#81d4fa; min-width:320px;">
+                        <h3 style="color:#0277bd; border-bottom-color:#4fc3f7;">抽出シミュレーション設定</h3>
                         
                         <div class="setting-group" style="border-color:#b3e5fc;">
-                            <label class="main-label" style="color:#0277bd;">信頼区間</label>
-                            <select id="confidence-level-2">
-                                <option value="90">90% 信頼区間</option>
-                                <option value="95" selected>95% 信頼区間</option>
-                                <option value="99">99% 信頼区間</option>
-                            </select>
+                            <label class="main-label" style="color:#0277bd;">1. 信頼水準 (同時比較)</label>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label"><input type="checkbox" class="conf-chk" value="90"> 90%</label>
+                                <label class="checkbox-label"><input type="checkbox" class="conf-chk" value="95" checked> 95%</label>
+                                <label class="checkbox-label"><input type="checkbox" class="conf-chk" value="99" checked> 99%</label>
+                            </div>
+                            <p style="font-size:0.8em; color:#666; margin:0;">※複数選択するとグラフ上で幅を比較できます</p>
                         </div>
                         
                         <div class="setting-group" style="border-color:#b3e5fc;">
-                            <label class="main-label" style="color:#0277bd;">試行回数 (抽出の反復数)</label>
-                            <input type="number" id="num-trials" value="100" min="10" max="500" step="10">
+                            <label class="main-label" style="color:#0277bd;">2. サンプルサイズ $n$ (抽出数)</label>
+                            <input type="range" id="input-n-size" min="2" max="50" step="1" value="10">
+                            <div style="text-align:right; font-weight:bold; color:#01579b;">$n = $ <span id="label-n-size">10</span> 個</div>
                         </div>
 
-                        <button id="btn-run" class="action-btn" style="background-color:#03a9f4;">100回 区間推定を行う</button>
+                        <div style="display:flex; flex-direction:column; gap:10px; margin-top:10px;">
+                            <button id="btn-run-single" class="action-btn btn-outline" style="color:#0277bd; border-color:#0277bd;">1回抽出 (プロセスと幅を確認)</button>
+                            <button id="btn-run-mass" class="action-btn" style="background-color:#03a9f4;">100回 まとめて抽出</button>
+                            <button id="btn-reset" class="action-btn btn-outline" style="color:#666; border-color:#999; padding:8px;">リセット</button>
+                        </div>
                     </div>
 
-                    <div class="visualization-panel">
-                        <div class="result-box">
-                            <h4>シミュレーション結果（各回で母分散: 未知として $t$ 分布で計算）</h4>
+                    <div class="visualization-panel" style="flex: 2.5;">
+                        <!-- 1回の抽出プロセスを示すグラフ -->
+                        <div class="graph-box" style="border-color:#b3e5fc;">
+                            <h4 class="graph-title" style="color:#0277bd; border-left-color:#0277bd;">① 母集団からの抽出と信頼区間の長さ（最新の1回）</h4>
+                            <div class="canvas-wrapper">
+                                <canvas id="chart-population"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- 1回抽出時の詳細データ表示 -->
+                        <div id="single-detail-panel" class="detail-panel">
+                            <h5>抽出されたデータと計算された信頼区間の詳細</h5>
+                            <div style="font-weight:bold; color:#0277bd; font-size:0.9em; margin-bottom:5px;">抽出された生データ ($n$個):</div>
+                            <div id="detail-raw-data" class="data-raw"></div>
+                            
+                            <div class="detail-row"><span>標本平均 $\overline{x}$</span> <span id="detail-mean" style="font-weight:bold;">-</span></div>
+                            <div class="detail-row"><span>標準誤差 $SE$</span> <span id="detail-se">-</span></div>
+                            
+                            <div style="font-weight:bold; color:#0277bd; font-size:0.9em; margin-top:10px; margin-bottom:5px;">選択された信頼区間と幅:</div>
+                            <div id="detail-intervals-list">
+                                <!-- JSで動的生成 -->
+                            </div>
+                        </div>
+
+                        <!-- 多数回の結果と統計 -->
+                        <div class="result-box" style="margin-top:15px;">
+                            <h4 style="color:#0277bd; border-bottom-color:#eee;">② 繰り返しの結果（全試行履歴）</h4>
+                            <p style="font-size:0.85em; color:#666;">
+                                ※複数の信頼水準を選択している場合、最も高い信頼水準の包含結果を「統計」に表示し、グラフには重ねて描画します。
+                            </p>
                             
                             <div class="stats-container">
-                                <div class="stat-item">試行回数<span class="stat-value" id="stat-total">100</span></div>
-                                <div class="stat-item">真の $\mu$ を含んだ<span class="stat-value val-success" id="stat-success">0</span></div>
+                                <div class="stat-item">試行回数<span class="stat-value" id="stat-total">0</span></div>
+                                <div class="stat-item">$\mu$ を含んだ<span class="stat-value val-success" id="stat-success">0</span></div>
                                 <div class="stat-item">外した<span class="stat-value val-fail" id="stat-fail">0</span></div>
                                 <div class="stat-item">含有率<span class="stat-value" id="stat-rate" style="color:#0277bd;">0.0%</span></div>
                             </div>
@@ -247,10 +275,24 @@
                             <div class="canvas-container-large">
                                 <canvas id="ci-canvas"></canvas>
                             </div>
-                            <p style="font-size: 0.85em; color: #666; text-align: center; margin-top: 8px;">
-                                縦の破線：真の母平均 $\mu = 49$<br>
-                                各横線：1回の抽出データから作られた信頼区間。緑は $\mu$ を含み、赤は外しています。
-                            </p>
+                            
+                            <!-- 履歴テーブル -->
+                            <div class="table-container">
+                                <table id="history-table">
+                                    <thead>
+                                        <tr>
+                                            <th>試行</th>
+                                            <th>標本平均 $\overline{x}$</th>
+                                            <th>信頼区間 (最も高い水準)</th>
+                                            <th>幅(長さ)</th>
+                                            <th>判定</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="history-tbody">
+                                        <!-- 行が動的に追加されます -->
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -260,56 +302,54 @@
 
     <script>
         // ==========================================
-        // 共通・テーブルデータ
+        // 共通データ・関数
         // ==========================================
         const zTable = { 90: 1.645, 95: 1.960, 99: 2.576 };
         
-        // t分布のパーセント点表 (自由度 df=1〜20)
+        // t分布パーセント点表 (df=1〜50)
         const tTable = {
-            90: [0, 6.314, 2.920, 2.353, 2.132, 2.015, 1.943, 1.895, 1.860, 1.833, 1.812, 1.796, 1.782, 1.771, 1.761, 1.753, 1.746, 1.740, 1.734, 1.729, 1.725],
-            95: [0, 12.706, 4.303, 3.182, 2.776, 2.571, 2.447, 2.365, 2.306, 2.262, 2.228, 2.201, 2.179, 2.160, 2.145, 2.131, 2.120, 2.110, 2.101, 2.093, 2.086],
-            99: [0, 63.657, 9.925, 5.841, 4.604, 4.032, 3.707, 3.499, 3.355, 3.250, 3.169, 3.106, 3.055, 3.012, 2.977, 2.947, 2.921, 2.898, 2.878, 2.861, 2.845]
+            90: [0, 6.314, 2.920, 2.353, 2.132, 2.015, 1.943, 1.895, 1.860, 1.833, 1.812, 1.796, 1.782, 1.771, 1.761, 1.753, 1.746, 1.740, 1.734, 1.729, 1.725, 1.721, 1.717, 1.714, 1.711, 1.708, 1.706, 1.703, 1.701, 1.699, 1.697, 1.696, 1.694, 1.692, 1.691, 1.690, 1.688, 1.687, 1.686, 1.685, 1.684, 1.683, 1.682, 1.681, 1.680, 1.679, 1.679, 1.678, 1.677, 1.677, 1.676],
+            95: [0, 12.706, 4.303, 3.182, 2.776, 2.571, 2.447, 2.365, 2.306, 2.262, 2.228, 2.201, 2.179, 2.160, 2.145, 2.131, 2.120, 2.110, 2.101, 2.093, 2.086, 2.080, 2.074, 2.069, 2.064, 2.060, 2.056, 2.052, 2.048, 2.045, 2.042, 2.040, 2.037, 2.035, 2.032, 2.030, 2.028, 2.026, 2.024, 2.023, 2.021, 2.020, 2.018, 2.017, 2.015, 2.014, 2.013, 2.012, 2.011, 2.010, 2.009],
+            99: [0, 63.657, 9.925, 5.841, 4.604, 4.032, 3.707, 3.499, 3.355, 3.250, 3.169, 3.106, 3.055, 3.012, 2.977, 2.947, 2.921, 2.898, 2.878, 2.861, 2.845, 2.831, 2.819, 2.807, 2.797, 2.787, 2.779, 2.771, 2.763, 2.756, 2.750, 2.744, 2.738, 2.733, 2.728, 2.724, 2.719, 2.715, 2.712, 2.708, 2.704, 2.701, 2.698, 2.695, 2.692, 2.690, 2.687, 2.685, 2.682, 2.680, 2.678]
         };
 
-        // 正規乱数生成 (Box-Muller)
         function generateNormal(mu, sigma) {
             let u1 = Math.random(), u2 = Math.random();
             let z = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
             return z * sigma + mu;
         }
 
+        function normalPDF(x, mu, sigma) {
+            const coef = 1 / (sigma * Math.sqrt(2 * Math.PI));
+            const exponent = -Math.pow(x - mu, 2) / (2 * Math.pow(sigma, 2));
+            return coef * Math.exp(exponent);
+        }
 
         // ==========================================
         // PART 1: 計算シミュレータ
         // ==========================================
-        let chartInstance = null;
-
         function performEstimation() {
             const dataStr = document.getElementById('input-data').value;
             const dataArr = dataStr.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
             const n = dataArr.length;
-
             if (n <= 1) { alert("区間推定には2つ以上のデータが必要です。"); return; }
-
             const mean = dataArr.reduce((a, b) => a + b, 0) / n;
             const unbiasedVar = dataArr.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / (n - 1);
-            
             const mode = document.getElementById('variance-mode').value;
             const confLevel = parseInt(document.getElementById('confidence-level-1').value);
 
             let varianceUsed, stdError, criticalValue, distributionUsed;
-
             if (mode === 'known') {
-                varianceUsed = 4; // 問題設定
+                varianceUsed = 4;
                 stdError = Math.sqrt(varianceUsed) / Math.sqrt(n);
                 criticalValue = zTable[confLevel];
-                distributionUsed = `標準正規分布 $Z_{\\alpha/2} = ${criticalValue}$`;
+                distributionUsed = `標準正規分布 $Z = ${criticalValue}$`;
             } else {
                 varianceUsed = unbiasedVar;
                 stdError = Math.sqrt(varianceUsed) / Math.sqrt(n);
                 const df = n - 1;
-                criticalValue = (df <= 20) ? tTable[confLevel][df] : zTable[confLevel];
-                distributionUsed = (df <= 20) ? `$t$ 分布 (自由度 ${df}) $t = ${criticalValue}$` : `近似的に正規分布を利用`;
+                criticalValue = (df <= 50) ? tTable[confLevel][df] : zTable[confLevel];
+                distributionUsed = (df <= 50) ? `$t$ 分布 (自由度 ${df}) $t = ${criticalValue}$` : `正規分布近似`;
             }
 
             const marginOfError = criticalValue * stdError;
@@ -318,155 +358,323 @@
 
             const outputDiv = document.getElementById('calc-output');
             outputDiv.innerHTML = `
-                <div class="calc-row"><span>サンプルサイズ $n$</span> <span>${n}</span></div>
-                <div class="calc-row"><span>標本平均 $\\overline{x}$ (点推定値)</span> <span class="highlight-val">${mean.toFixed(2)}</span></div>
-                <div class="calc-row"><span>標本不偏分散 $s^2$</span> <span>${unbiasedVar.toFixed(3)}</span></div>
-                <div class="calc-row"><span>使用する母分散 $\\sigma^2$</span> <span>${mode === 'known' ? '4 (既知)' : `${unbiasedVar.toFixed(3)} (不偏分散を代用)`}</span></div>
-                <div class="calc-row"><span>標準誤差 $SE$</span> <span>${stdError.toFixed(4)}</span></div>
-                <div class="calc-row"><span>利用する確率分布と係数</span> <span>${distributionUsed}</span></div>
-                <div class="calc-row"><span>誤差マージン</span> <span>$\\pm ${marginOfError.toFixed(3)}$</span></div>
-                <div class="calc-row" style="margin-top:10px; font-weight:bold; background:#e8f5e9; padding:10px; border-radius:4px;">
+                <div style="display:flex; justify-content:space-between; border-bottom: 1px dashed #ddd; padding-bottom: 5px; margin-bottom: 8px;"><span>サンプルサイズ $n$</span> <span>${n}</span></div>
+                <div style="display:flex; justify-content:space-between; border-bottom: 1px dashed #ddd; padding-bottom: 5px; margin-bottom: 8px;"><span>標本平均 $\\overline{x}$ (点推定値)</span> <span style="color:#d32f2f; font-weight:bold;">${mean.toFixed(2)}</span></div>
+                <div style="display:flex; justify-content:space-between; border-bottom: 1px dashed #ddd; padding-bottom: 5px; margin-bottom: 8px;"><span>標本不偏分散 $s^2$</span> <span>${unbiasedVar.toFixed(3)}</span></div>
+                <div style="display:flex; justify-content:space-between; border-bottom: 1px dashed #ddd; padding-bottom: 5px; margin-bottom: 8px;"><span>標準誤差 $SE$</span> <span>${stdError.toFixed(4)}</span></div>
+                <div style="display:flex; justify-content:space-between; border-bottom: 1px dashed #ddd; padding-bottom: 5px; margin-bottom: 8px;"><span>利用する確率分布と係数</span> <span>${distributionUsed}</span></div>
+                <div style="margin-top:15px; font-weight:bold; background:#e8f5e9; padding:10px; border-radius:4px; display:flex; justify-content:space-between;">
                     <span>${confLevel}% 信頼区間</span>
-                    <span class="highlight-val" style="color:#2e7d32;">[ ${lowerBound.toFixed(2)}, ${upperBound.toFixed(2)} ]</span>
+                    <span style="color:#2e7d32; font-size:1.1em;">[ ${lowerBound.toFixed(2)}, ${upperBound.toFixed(2)} ]</span>
                 </div>
             `;
             if (window.MathJax) { MathJax.typesetPromise([outputDiv]).catch(err => console.log(err)); }
-
-            drawIntervalChart(mean, lowerBound, upperBound, confLevel);
         }
-
-        function drawIntervalChart(mean, lower, upper, confLevel) {
-            const ctx = document.getElementById('chart-interval').getContext('2d');
-            if (chartInstance) chartInstance.destroy();
-
-            const range = upper - lower;
-            const xMin = lower - range * 0.5;
-            const xMax = upper + range * 0.5;
-
-            chartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    datasets: [
-                        { label: `${confLevel}% 信頼区間`, data: [{ x: lower, y: 1 }, { x: upper, y: 1 }], borderColor: '#2e7d32', borderWidth: 4, pointRadius: 0, showLine: true },
-                        { label: `下限 (${lower.toFixed(2)})`, data: [{ x: lower, y: 1 }], backgroundColor: '#2e7d32', borderColor: '#fff', borderWidth: 2, pointRadius: 6, pointStyle: 'rect' },
-                        { label: `上限 (${upper.toFixed(2)})`, data: [{ x: upper, y: 1 }], backgroundColor: '#2e7d32', borderColor: '#fff', borderWidth: 2, pointRadius: 6, pointStyle: 'rect' },
-                        { type: 'scatter', label: `標本平均 = ${mean.toFixed(2)}`, data: [{ x: mean, y: 1 }], backgroundColor: '#d32f2f', borderColor: '#fff', borderWidth: 2, pointRadius: 8 }
-                    ]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    scales: { x: { type: 'linear', min: xMin, max: xMax }, y: { display: false, min: 0, max: 2 } },
-                    plugins: { legend: { position: 'top' } }
-                }
-            });
-        }
-
 
         // ==========================================
         // PART 2: 反復シミュレータ
         // ==========================================
         const TRUE_MU = 49;
-        const TRUE_SIGMA = 2; // 分散は4
-        const SAMPLE_SIZE = 10; 
+        const TRUE_SIGMA = 2; // 分散4
+        let historyIntervals = []; // 試行履歴
+        let chartPopInstance = null;
 
-        function runIterativeSimulation() {
-            const confLevel = parseInt(document.getElementById('confidence-level-2').value);
-            const numTrials = parseInt(document.getElementById('num-trials').value);
-            
-            // df = n-1 = 9
-            const tValue = tTable[confLevel][9];
-            let successCount = 0;
-            let intervals = [];
-
-            for (let j = 0; j < numTrials; j++) {
-                let sample = [];
-                for(let i = 0; i < SAMPLE_SIZE; i++) sample.push(generateNormal(TRUE_MU, TRUE_SIGMA));
-
-                let sum = sample.reduce((a, b) => a + b, 0);
-                let mean = sum / SAMPLE_SIZE;
-                let variance = sample.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / (SAMPLE_SIZE - 1);
-                let stdError = Math.sqrt(variance / SAMPLE_SIZE);
-
-                let marginOfError = tValue * stdError;
-                let lowerBound = mean - marginOfError;
-                let upperBound = mean + marginOfError;
-
-                let containsMu = (TRUE_MU >= lowerBound && TRUE_MU <= upperBound);
-                if (containsMu) successCount++;
-
-                intervals.push({ mean, lower: lowerBound, upper: upperBound, containsMu });
-            }
-
-            document.getElementById('stat-total').innerText = numTrials;
-            document.getElementById('stat-success').innerText = successCount;
-            document.getElementById('stat-fail').innerText = numTrials - successCount;
-            document.getElementById('stat-rate').innerText = ((successCount / numTrials) * 100).toFixed(1) + '%';
-            document.getElementById('btn-run').innerText = `${numTrials}回 区間推定を行う`;
-
-            drawIterativeCanvas(intervals, numTrials);
+        function updateNLabel() {
+            document.getElementById('label-n-size').innerText = document.getElementById('input-n-size').value;
         }
 
-        function drawIterativeCanvas(intervals, numTrials) {
+        function getActiveLevels() {
+            const checkboxes = document.querySelectorAll('.conf-chk');
+            let levels = [];
+            checkboxes.forEach(chk => { if(chk.checked) levels.push(parseInt(chk.value)); });
+            return levels.sort((a,b) => a - b);
+        }
+
+        function processTrial() {
+            const activeLevels = getActiveLevels();
+            if (activeLevels.length === 0) { alert("少なくとも1つの信頼水準を選択してください。"); return null; }
+            
+            const n = parseInt(document.getElementById('input-n-size').value);
+            const df = n - 1;
+
+            let sample = [];
+            for(let i = 0; i < n; i++) sample.push(generateNormal(TRUE_MU, TRUE_SIGMA));
+
+            let mean = sample.reduce((a, b) => a + b, 0) / n;
+            let variance = sample.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / df;
+            let stdError = Math.sqrt(variance / n);
+            
+            let intervals = {};
+            activeLevels.forEach(level => {
+                const tValue = (df <= 50) ? tTable[level][df] : zTable[level];
+                const marginOfError = tValue * stdError;
+                const lowerBound = mean - marginOfError;
+                const upperBound = mean + marginOfError;
+                intervals[level] = {
+                    lower: lowerBound,
+                    upper: upperBound,
+                    width: upperBound - lowerBound,
+                    containsMu: (TRUE_MU >= lowerBound && TRUE_MU <= upperBound)
+                };
+            });
+
+            return {
+                sample: sample,
+                mean: mean,
+                stdError: stdError,
+                activeLevels: activeLevels,
+                intervals: intervals
+            };
+        }
+
+        function drawPopulationChart(result) {
+            const ctx = document.getElementById('chart-population').getContext('2d');
+            if (chartPopInstance) chartPopInstance.destroy();
+
+            const xMin = TRUE_MU - 4 * TRUE_SIGMA;
+            const xMax = TRUE_MU + 4 * TRUE_SIGMA;
+            const step = (xMax - xMin) / 100;
+
+            let lineData = [];
+            for (let x = xMin; x <= xMax; x += step) {
+                lineData.push({ x: x, y: normalPDF(x, TRUE_MU, TRUE_SIGMA) });
+            }
+
+            let scatterData = result ? result.sample.map(val => ({ x: val, y: 0.005 })) : [];
+            let datasets = [
+                { label: '母集団分布 N(49, 4)', data: lineData, borderColor: '#1976d2', backgroundColor: 'rgba(25, 118, 210, 0.1)', borderWidth: 2, fill: true, pointRadius: 0 },
+                { type: 'scatter', label: '抽出されたデータ', data: scatterData, backgroundColor: '#d32f2f', borderColor: '#fff', borderWidth: 1, pointRadius: 5 }
+            ];
+
+            if (result && result.activeLevels.length > 0) {
+                // Y座標をずらして信頼区間を描画
+                const yOffsets = { 99: -0.045, 95: -0.030, 90: -0.015 };
+                const colors = { 99: '#1565c0', 95: '#2e7d32', 90: '#f57c00' };
+
+                // 標本平均の点 (一番下の線のY座標に合わせる)
+                const meanY = yOffsets[result.activeLevels[0]];
+                
+                result.activeLevels.forEach(level => {
+                    const intv = result.intervals[level];
+                    const y = yOffsets[level] || -0.02;
+                    const color = intv.containsMu ? colors[level] : '#c62828';
+                    datasets.push({
+                        label: `${level}%区間 ${intv.containsMu ? '(○)' : '(×)'}`,
+                        data: [{x: intv.lower, y: y}, {x: intv.upper, y: y}],
+                        borderColor: color, borderWidth: 3, pointRadius: 0, showLine: true
+                    });
+                });
+
+                datasets.push({
+                    type: 'scatter', label: `標本平均 (${result.mean.toFixed(2)})`,
+                    data: [{x: result.mean, y: meanY}],
+                    backgroundColor: '#d32f2f', borderColor: '#fff', borderWidth: 2, pointRadius: 6
+                });
+            }
+
+            chartPopInstance = new Chart(ctx, {
+                type: 'line',
+                data: { datasets: datasets },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: {
+                        x: { type: 'linear', min: 40, max: 58, title: { display: true, text: 'ポテトの本数' } },
+                        y: { min: -0.06, max: 0.22, display: false }
+                    },
+                    plugins: { legend: { position: 'top', labels: { boxWidth: 12, font: {size: 10} } } },
+                    animation: { duration: 400 }
+                }
+            });
+        }
+
+        function showSingleDetail(result) {
+            const panel = document.getElementById('single-detail-panel');
+            panel.style.display = 'block';
+            
+            // 生データ
+            const rawStr = result.sample.map(v => v.toFixed(2)).join(', ');
+            document.getElementById('detail-raw-data').innerText = `[ ${rawStr} ]`;
+            document.getElementById('detail-mean').innerText = result.mean.toFixed(3);
+            document.getElementById('detail-se').innerText = result.stdError.toFixed(4);
+
+            // 区間リスト
+            const listDiv = document.getElementById('detail-intervals-list');
+            listDiv.innerHTML = '';
+            
+            result.activeLevels.forEach(level => {
+                const intv = result.intervals[level];
+                const html = `
+                    <div class="detail-row" style="background:#fff; padding:8px; border-radius:4px; margin-bottom:5px;">
+                        <span style="font-weight:bold; color:#333;">${level}% 信頼区間:</span>
+                        <span style="color:${intv.containsMu ? '#2e7d32' : '#c62828'}; font-weight:bold;">
+                            [ ${intv.lower.toFixed(2)}, ${intv.upper.toFixed(2)} ]
+                        </span>
+                        <span>(幅: ${intv.width.toFixed(2)})</span>
+                        <span style="font-weight:bold; color:${intv.containsMu ? '#2e7d32' : '#c62828'};">
+                            ${intv.containsMu ? '○ 含む' : '× 外れ'}
+                        </span>
+                    </div>
+                `;
+                listDiv.innerHTML += html;
+            });
+        }
+
+        function updateStatsUI() {
+            if (historyIntervals.length === 0) return;
+            
+            // 最も高い信頼水準の包含結果を統計に利用
+            const highestLevel = Math.max(...historyIntervals[0].activeLevels);
+            
+            const total = historyIntervals.length;
+            const success = historyIntervals.filter(r => r.intervals[highestLevel].containsMu).length;
+            const fail = total - success;
+            const rate = total > 0 ? ((success / total) * 100).toFixed(1) : "0.0";
+
+            document.getElementById('stat-total').innerText = total;
+            document.getElementById('stat-success').innerText = success;
+            document.getElementById('stat-fail').innerText = fail;
+            document.getElementById('stat-rate').innerText = rate + '%';
+        }
+
+        function appendToTable(result, index) {
+            const tbody = document.getElementById('history-tbody');
+            const tr = document.createElement('tr');
+            
+            const highestLevel = Math.max(...result.activeLevels);
+            const targetIntv = result.intervals[highestLevel];
+
+            tr.className = targetIntv.containsMu ? 'row-success' : 'row-fail';
+            
+            tr.innerHTML = `
+                <td>${index}</td>
+                <td>${result.mean.toFixed(2)}</td>
+                <td>[${targetIntv.lower.toFixed(2)}, ${targetIntv.upper.toFixed(2)}] (${highestLevel}%)</td>
+                <td>${targetIntv.width.toFixed(2)}</td>
+                <td>${targetIntv.containsMu ? '○ 含む' : '× 外れ'}</td>
+            `;
+            tbody.insertBefore(tr, tbody.firstChild);
+        }
+
+        function drawIterativeCanvas() {
             const canvas = document.getElementById('ci-canvas');
             const ctx = canvas.getContext('2d');
-            
             canvas.width = canvas.parentElement.clientWidth;
             canvas.height = canvas.parentElement.clientHeight;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+            const numTrials = historyIntervals.length;
+            if (numTrials === 0) return;
+
             const paddingX = 20, paddingY = 20;
             const plotWidth = canvas.width - paddingX * 2;
             const plotHeight = canvas.height - paddingY * 2;
-
-            const minX = TRUE_MU - TRUE_SIGMA * 2.5; 
-            const maxX = TRUE_MU + TRUE_SIGMA * 2.5;
+            const minX = 42; 
+            const maxX = 56;
 
             const getX = (val) => paddingX + ((val - minX) / (maxX - minX)) * plotWidth;
             const getY = (index) => paddingY + (index / (numTrials - 1 || 1)) * plotHeight;
 
-            // 真の母平均のライン
+            // 真の母平均ライン
             const trueMuX = getX(TRUE_MU);
             ctx.beginPath();
             ctx.setLineDash([5, 5]);
-            ctx.moveTo(trueMuX, 0);
-            ctx.lineTo(trueMuX, canvas.height);
-            ctx.strokeStyle = '#333';
-            ctx.lineWidth = 1.5;
-            ctx.stroke();
+            ctx.moveTo(trueMuX, 0); ctx.lineTo(trueMuX, canvas.height);
+            ctx.strokeStyle = '#333'; ctx.lineWidth = 1.5; ctx.stroke();
             ctx.setLineDash([]);
 
-            // 各信頼区間
-            intervals.forEach((interval, index) => {
+            // 各信頼区間の描画（ラダープロット重ね合わせ）
+            // 描画順: 99% (太く薄い) -> 95% (中) -> 90% (細く濃い)
+            const styleMap = {
+                99: { width: numTrials > 50 ? 3 : 5, alpha: 0.3 },
+                95: { width: numTrials > 50 ? 2 : 3, alpha: 0.6 },
+                90: { width: 1, alpha: 1.0 }
+            };
+
+            // 幅の広いレベルから描画するためにソート (降順)
+            const levelsToDraw = [...historyIntervals[0].activeLevels].sort((a,b) => b - a);
+
+            historyIntervals.forEach((result, index) => {
                 const y = getY(index);
-                const xLower = getX(interval.lower);
-                const xUpper = getX(interval.upper);
-                const xMean = getX(interval.mean);
+                const xMean = getX(result.mean);
 
-                ctx.strokeStyle = interval.containsMu ? 'rgba(46, 125, 50, 0.7)' : 'rgba(198, 40, 40, 1)';
-                ctx.fillStyle = interval.containsMu ? 'rgba(46, 125, 50, 0.7)' : 'rgba(198, 40, 40, 1)';
-                ctx.lineWidth = 2;
+                levelsToDraw.forEach(level => {
+                    const intv = result.intervals[level];
+                    const xLower = getX(intv.lower);
+                    const xUpper = getX(intv.upper);
+                    
+                    const r = intv.containsMu ? '46, 125, 50' : '198, 40, 40'; // 緑 or 赤
+                    ctx.strokeStyle = `rgba(${r}, ${styleMap[level].alpha})`;
+                    ctx.lineWidth = styleMap[level].width;
+                    
+                    ctx.beginPath(); ctx.moveTo(xLower, y); ctx.lineTo(xUpper, y); ctx.stroke();
+                });
 
-                ctx.beginPath(); ctx.moveTo(xLower, y); ctx.lineTo(xUpper, y); ctx.stroke();
-                ctx.beginPath(); ctx.arc(xMean, y, 2.5, 0, Math.PI * 2); ctx.fill();
+                // 平均の点
+                const highestIntv = result.intervals[Math.max(...levelsToDraw)];
+                ctx.fillStyle = highestIntv.containsMu ? 'rgba(46, 125, 50, 0.9)' : 'rgba(198, 40, 40, 0.9)';
+                ctx.beginPath(); ctx.arc(xMean, y, numTrials > 50 ? 1.5 : 2.5, 0, Math.PI * 2); ctx.fill();
             });
         }
 
-        // ==========================================
-        // イベントリスナー
-        // ==========================================
-        window.addEventListener('resize', () => {
-            if (document.getElementById('stat-total').innerText !== "0") {
-                document.getElementById('btn-run').click();
+        // --- イベントハンドラ ---
+        function runSingle() {
+            const result = processTrial();
+            if (!result) return;
+            historyIntervals.push(result);
+            drawPopulationChart(result);
+            showSingleDetail(result);
+            updateStatsUI();
+            appendToTable(result, historyIntervals.length);
+            drawIterativeCanvas();
+            if (window.MathJax) { MathJax.typesetPromise([document.getElementById('single-detail-panel')]); }
+        }
+
+        function runMass() {
+            const numToAdd = 100;
+            let lastResult = null;
+            // 詳細パネルは隠す
+            document.getElementById('single-detail-panel').style.display = 'none';
+
+            for(let i = 0; i < numToAdd; i++) {
+                const result = processTrial();
+                if (!result) return;
+                historyIntervals.push(result);
+                appendToTable(result, historyIntervals.length);
+                lastResult = result;
             }
-        });
+            if(lastResult) drawPopulationChart(lastResult);
+            updateStatsUI();
+            drawIterativeCanvas();
+        }
+
+        function resetSimulation() {
+            historyIntervals = [];
+            document.getElementById('history-tbody').innerHTML = '';
+            document.getElementById('single-detail-panel').style.display = 'none';
+            
+            document.getElementById('stat-total').innerText = '0';
+            document.getElementById('stat-success').innerText = '0';
+            document.getElementById('stat-fail').innerText = '0';
+            document.getElementById('stat-rate').innerText = '0.0%';
+
+            drawPopulationChart(null);
+            drawIterativeCanvas();
+        }
+
+        window.addEventListener('resize', () => { drawIterativeCanvas(); });
 
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('btn-calc').addEventListener('click', performEstimation);
-            document.getElementById('btn-run').addEventListener('click', runIterativeSimulation);
+            
+            document.getElementById('input-n-size').addEventListener('input', updateNLabel);
+            document.getElementById('btn-run-single').addEventListener('click', runSingle);
+            document.getElementById('btn-run-mass').addEventListener('click', runMass);
+            document.getElementById('btn-reset').addEventListener('click', resetSimulation);
             
             // 初期実行
             performEstimation();
-            runIterativeSimulation();
+            updateNLabel();
+            drawPopulationChart(null); 
         });
     </script>
 </body>
